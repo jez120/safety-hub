@@ -5,7 +5,7 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/compo
 import {Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
-import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger} from '@/components/ui/dialog';
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from '@/components/ui/dialog';
 import {Textarea} from '@/components/ui/textarea';
 import {Label} from '@/components/ui/label';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
@@ -22,6 +22,7 @@ import {
   Legend,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import Link from 'next/link';
 
 ChartJS.register(
   CategoryScale,
@@ -166,7 +167,12 @@ export default function AdminPage() {
 
   return (
     <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        <Link href="/" className="text-blue-600 hover:underline">
+          Back to Landing Page
+        </Link>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <Card>
@@ -360,3 +366,4 @@ function SuggestionDialog({open, onClose, suggestion, onSave}) {
     </Dialog>
   );
 }
+
