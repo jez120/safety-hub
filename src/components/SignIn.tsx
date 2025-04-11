@@ -5,6 +5,7 @@ import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {useAuth} from '@/components/AuthProvider';
 import {useToast} from '@/hooks/use-toast';
+import Link from 'next/link';
 
 export const SignIn = () => {
   const [email, setEmail] = useState('');
@@ -48,6 +49,10 @@ export const SignIn = () => {
         />
       </div>
       <Button type="submit">Sign In</Button>
+       <Link href="/signup" className="text-blue-600 hover:underline">
+          Create an account
+        </Link>
     </form>
   );
 };
+

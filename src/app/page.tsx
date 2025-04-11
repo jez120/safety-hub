@@ -5,7 +5,6 @@ import {useToast} from '@/hooks/use-toast';
 import {useRouter} from 'next/navigation';
 import {useAuth} from '@/components/AuthProvider';
 import {SignIn} from '@/components/SignIn';
-import {SignUp} from '@/components/SignUp';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import Link from 'next/link';
 
@@ -65,16 +64,6 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <SignIn />
-              </CardContent>
-            </Card>
-
-            <Card className="w-96">
-              <CardHeader>
-                <CardTitle>Sign Up</CardTitle>
-                <CardDescription>Create an account to get started</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <SignUp />
               </CardContent>
             </Card>
           </div>
