@@ -1,44 +1,42 @@
 'use client';
 
 import {Button} from '@/components/ui/button';
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import {useToast} from '@/hooks/use-toast';
-import {useState} from 'react';
-import Link from 'next/link';
 import {useRouter} from 'next/navigation';
+import {useAuth} from '@/components/AuthProvider';
+import {SignIn} from '@/components/SignIn';
+import {SignUp} from '@/components/SignUp';
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
+import Link from 'next/link';
 
 export default function Home() {
   const {toast} = useToast();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
+  const {user, signOutUser, loading} = useAuth();
 
-  const handleLogin = (role: 'user' | 'admin') => {
-    setIsLoggedIn(true);
-    if (role === 'admin') {
-      setIsAdmin(true);
+  const handleAdminLogin = () => {
+    router.push('/admin'); // Redirect to admin page
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOutUser();
       toast({
-        title: 'Admin Login',
-        description: 'You have logged in as an administrator.',
+        title: 'Logout',
+        description: 'You have been logged out.',
       });
-      router.push('/admin'); // Redirect to admin page
-    } else {
-      setIsAdmin(false);
+    } catch (error) {
       toast({
-        title: 'User Login',
-        description: 'You have logged in as a regular user.',
+        variant: 'destructive',
+        title: 'Logout failed',
+        description: 'Failed to log out. Please try again.',
       });
     }
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setIsAdmin(false);
-    toast({
-      title: 'Logout',
-      description: 'You have been logged out.',
-    });
-  };
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-2">
@@ -51,18 +49,40 @@ export default function Home() {
         </h1>
 
         <p className="mt-3 text-2xl">
-          {isLoggedIn
-            ? 'You are logged in.'
-            : 'Get started by logging in as a user or an administrator.'}
+          {user
+            ? `You are logged in as ${user.displayName || 'User'}.`
+            : 'Get started by signing in or creating an account.'}
         </p>
 
-        {!isLoggedIn ? (
-          <div className="mt-6 flex justify-center items-center gap-4">
-            <Button onClick={() => handleLogin('user')}>Login as User</Button>
-            <Button onClick={() => handleLogin('admin')}>Login as Admin</Button>
+        {!user ? (
+          <div className="mt-6 flex justify-center items-start gap-4">
+            <Card className="w-96">
+              <CardHeader>
+                <CardTitle>Sign In</CardTitle>
+                <CardDescription>
+                  Sign in to access your account
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <SignIn />
+              </CardContent>
+            </Card>
+
+            <Card className="w-96">
+              <CardHeader>
+                <CardTitle>Sign Up</CardTitle>
+                <CardDescription>Create an account to get started</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <SignUp />
+              </CardContent>
+            </Card>
           </div>
         ) : (
-          <Button onClick={handleLogout}>Logout</Button>
+          <div className="mt-6 flex flex-col items-center gap-4">
+            <Button onClick={handleLogout}>Logout</Button>
+            <Button onClick={handleAdminLogin}>Admin Dashboard</Button>
+          </div>
         )}
       </main>
 
