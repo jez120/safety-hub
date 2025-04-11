@@ -64,22 +64,25 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <SignIn />
+                <Link href="/signup" className="text-blue-600 hover:underline">
+                  Create an account
+                </Link>
               </CardContent>
             </Card>
           </div>
         ) : (
           <div className="mt-6 flex flex-col items-center gap-4">
             <Button onClick={handleLogout}>Logout</Button>
-            <Button onClick={handleAdminLogin}>Admin Dashboard</Button>
           </div>
         )}
+        <Button onClick={handleAdminLogin}>Admin Dashboard</Button>
       </main>
 
       <footer className="flex items-center justify-center w-full h-24 border-t">
         <p>
           Powered by{' '}
           <a className="text-blue-600" href="https://example.com">
-            Example Inc.
+            Arek Peter Inc.
           </a>
         </p>
       </footer>
