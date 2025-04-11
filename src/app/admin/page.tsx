@@ -9,11 +9,28 @@ import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Dia
 import {Textarea} from '@/components/ui/textarea';
 import {Label} from '@/components/ui/label';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
-import {Calendar} from '@/components/ui/calendar';
-import {Popover, PopoverContent, PopoverTrigger} from '@/components/ui/popover';
 import {cn} from '@/lib/utils';
 import {format} from 'date-fns';
 import {CalendarIcon} from 'lucide-react';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const sampleSuggestions = [
   {
@@ -73,6 +90,19 @@ const users = [
   "Emily White"
 ];
 
+const chartOptions = {
+  responsive: true,
+  plugins: {
+    legend: {
+      position: 'top' as const,
+    },
+    title: {
+      display: true,
+      text: 'Suggestion Status Chart',
+    },
+  },
+};
+
 export default function AdminPage() {
   const [suggestions, setSuggestions] = useState(sampleSuggestions);
   const [open, setOpen] = useState(false);
@@ -119,6 +149,21 @@ export default function AdminPage() {
     {}
   );
 
+  const chartData = {
+    labels: Object.keys(suggestionCounts),
+    datasets: [
+      {
+        label: 'Number of Suggestions',
+        data: Object.values(suggestionCounts),
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.5)',
+          'rgba(54, 162, 235, 0.5)',
+          'rgba(255, 206, 86, 0.5)',
+        ],
+      },
+    ],
+  };
+
   return (
     <div className="container mx-auto py-10">
       <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
@@ -153,6 +198,11 @@ export default function AdminPage() {
             <div className="text-2xl font-bold">{suggestionCounts.Closed || 0}</div>
           </CardContent>
         </Card>
+      </div>
+
+      <div className="mb-8">
+        <h2 className="text-2xl font-semibold mb-4">Suggestion Statistics</h2>
+        <Bar options={chartOptions} data={chartData} />
       </div>
 
       <div className="mb-8">
@@ -204,7 +254,6 @@ function SuggestionDialog({open, onClose, suggestion, onSave}) {
   const [category, setCategory] = useState(suggestion.category);
   const [status, setStatus] = useState(suggestion.status);
   const [description, setDescription] = useState(suggestion.description);
-  const [date, setDate] = useState<Date | undefined>(suggestion.date);
   const [assignedTo, setAssignedTo] = useState(suggestion.assignedTo);
 
   const handleSave = () => {
@@ -214,7 +263,6 @@ function SuggestionDialog({open, onClose, suggestion, onSave}) {
       category: category,
       status: status,
       description: description,
-      date: date || new Date(),
       assignedTo: assignedTo,
     };
     onSave(updatedSuggestion);
@@ -270,35 +318,6 @@ function SuggestionDialog({open, onClose, suggestion, onSave}) {
                 <SelectItem value="Closed">Closed</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="date" className="text-right">
-              Date
-            </Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={'outline'}
-                  className={cn(
-                    'w-[240px] pl-3 text-left font-normal',
-                    !date && 'text-muted-foreground'
-                  )}
-                >
-                  {date ? format(date, 'MM/dd/yyyy') : <span>Pick a date</span>}
-                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  disabled={false}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
           </div>
 
           <div className="grid grid-cols-4 items-center gap-4">
