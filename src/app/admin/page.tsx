@@ -9,6 +9,11 @@ import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Dia
 import {Textarea} from '@/components/ui/textarea';
 import {Label} from '@/components/ui/label';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
+import {Calendar} from '@/components/ui/calendar';
+import {Popover, PopoverContent, PopoverTrigger} from '@/components/ui/popover';
+import {cn} from '@/lib/utils';
+import {format} from 'date-fns';
+import {CalendarIcon} from 'lucide-react';
 
 const sampleSuggestions = [
   {
@@ -17,6 +22,8 @@ const sampleSuggestions = [
     category: 'Fire Safety',
     status: 'Open',
     description: 'Implement regular fire drills and ensure all fire extinguishers are easily accessible.',
+    date: new Date(),
+    assignedTo: 'John Doe',
   },
   {
     id: '2',
@@ -24,6 +31,8 @@ const sampleSuggestions = [
     category: 'Electrical Safety',
     status: 'In Progress',
     description: 'Regularly inspect electrical cords and outlets for damage.',
+    date: new Date(),
+    assignedTo: 'Jane Smith',
   },
   {
     id: '3',
@@ -31,6 +40,8 @@ const sampleSuggestions = [
     category: 'Chemical Safety',
     status: 'Closed',
     description: 'Improve labeling of chemical containers and provide better ventilation in storage areas.',
+    date: new Date(),
+    assignedTo: 'John Doe',
   },
   {
     id: '4',
@@ -38,6 +49,8 @@ const sampleSuggestions = [
     category: 'Fall Protection',
     status: 'Open',
     description: 'Install guardrails on elevated platforms and provide fall protection training.',
+    date: new Date(),
+    assignedTo: 'Jane Smith',
   },
 ];
 
@@ -51,6 +64,13 @@ const categories = [
   "Hazard Communication",
   "Ergonomics",
   "Other"
+];
+
+const users = [
+  "John Doe",
+  "Jane Smith",
+  "Robert Jones",
+  "Emily White"
 ];
 
 export default function AdminPage() {
@@ -143,6 +163,8 @@ export default function AdminPage() {
               <TableHead>Title</TableHead>
               <TableHead>Category</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Assigned To</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -152,6 +174,8 @@ export default function AdminPage() {
                 <TableCell>{suggestion.title}</TableCell>
                 <TableCell>{suggestion.category}</TableCell>
                 <TableCell>{suggestion.status}</TableCell>
+                <TableCell>{format(suggestion.date, 'MM/dd/yyyy')}</TableCell>
+                <TableCell>{suggestion.assignedTo}</TableCell>
                 <TableCell className="text-right">
                   <Button size="sm" onClick={() => handleOpenDialog(suggestion)}>
                     Manage
@@ -180,6 +204,8 @@ function SuggestionDialog({open, onClose, suggestion, onSave}) {
   const [category, setCategory] = useState(suggestion.category);
   const [status, setStatus] = useState(suggestion.status);
   const [description, setDescription] = useState(suggestion.description);
+  const [date, setDate] = useState<Date | undefined>(suggestion.date);
+  const [assignedTo, setAssignedTo] = useState(suggestion.assignedTo);
 
   const handleSave = () => {
     const updatedSuggestion = {
@@ -188,6 +214,8 @@ function SuggestionDialog({open, onClose, suggestion, onSave}) {
       category: category,
       status: status,
       description: description,
+      date: date || new Date(),
+      assignedTo: assignedTo,
     };
     onSave(updatedSuggestion);
   };
@@ -243,6 +271,52 @@ function SuggestionDialog({open, onClose, suggestion, onSave}) {
               </SelectContent>
             </Select>
           </div>
+
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="date" className="text-right">
+              Date
+            </Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={'outline'}
+                  className={cn(
+                    'w-[240px] pl-3 text-left font-normal',
+                    !date && 'text-muted-foreground'
+                  )}
+                >
+                  {date ? format(date, 'MM/dd/yyyy') : <span>Pick a date</span>}
+                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  disabled={false}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="assignedTo" className="text-right">
+              Assigned To
+            </Label>
+            <Select value={assignedTo} onValueChange={setAssignedTo}>
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="Assign a user" />
+              </SelectTrigger>
+              <SelectContent>
+                {users.map(user => (
+                  <SelectItem key={user} value={user}>{user}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="grid grid-cols-4 items-start gap-4">
             <Label htmlFor="description" className="text-right">
               Description
