@@ -41,6 +41,18 @@ const sampleSuggestions = [
   },
 ];
 
+const categories = [
+  "Fire Safety",
+  "Electrical Safety",
+  "Chemical Safety",
+  "Fall Protection",
+  "Machine Guarding",
+  "Personal Protective Equipment",
+  "Hazard Communication",
+  "Ergonomics",
+  "Other"
+];
+
 export default function AdminPage() {
   const [suggestions, setSuggestions] = useState(sampleSuggestions);
   const [open, setOpen] = useState(false);
@@ -205,12 +217,16 @@ function SuggestionDialog({open, onClose, suggestion, onSave}) {
             <Label htmlFor="category" className="text-right">
               Category
             </Label>
-            <Input
-              id="category"
-              value={category}
-              onChange={e => setCategory(e.target.value)}
-              className="col-span-3"
-            />
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map(cat => (
+                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="status" className="text-right">
