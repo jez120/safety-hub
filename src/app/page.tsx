@@ -5,11 +5,13 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/compo
 import {useToast} from '@/hooks/use-toast';
 import {useState} from 'react';
 import Link from 'next/link';
+import {useRouter} from 'next/navigation';
 
 export default function Home() {
   const {toast} = useToast();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const router = useRouter();
 
   const handleLogin = (role: 'user' | 'admin') => {
     setIsLoggedIn(true);
@@ -19,6 +21,7 @@ export default function Home() {
         title: 'Admin Login',
         description: 'You have logged in as an administrator.',
       });
+      router.push('/admin'); // Redirect to admin page
     } else {
       setIsAdmin(false);
       toast({
@@ -49,7 +52,7 @@ export default function Home() {
 
         <p className="mt-3 text-2xl">
           {isLoggedIn
-            ? 'You are logged in. Explore the options below.'
+            ? 'You are logged in.'
             : 'Get started by logging in as a user or an administrator.'}
         </p>
 
@@ -60,72 +63,6 @@ export default function Home() {
           </div>
         ) : (
           <Button onClick={handleLogout}>Logout</Button>
-        )}
-
-        {isLoggedIn && (
-          <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {!isAdmin && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Suggestion Submission</CardTitle>
-                  <CardDescription>Submit new safety suggestions.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p>
-                    <Link href="/submit-suggestion">Submit a safety suggestion here.</Link>
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-
-            {!isAdmin && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Suggestion Tracking</CardTitle>
-                  <CardDescription>Track the status of your suggestions.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p>
-                    <Link href="/track-suggestions">
-                      View the status of your submitted suggestions.
-                    </Link>
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-
-            {isAdmin && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Suggestion Management</CardTitle>
-                  <CardDescription>Manage and view all submitted suggestions.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p>
-                    <Link href="/manage-suggestions">
-                      Manage and update the status of suggestions.
-                    </Link>
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-
-            {isAdmin && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Dashboard Statistics</CardTitle>
-                  <CardDescription>View statistics on safety suggestions.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p>
-                    <Link href="/dashboard">
-                      Explore insights on suggestion trends and resolution times.
-                    </Link>
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
         )}
       </main>
 
