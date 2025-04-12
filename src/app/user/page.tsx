@@ -16,9 +16,6 @@ import {
     getDocs,
     getFirestore,
     where,
-    startAt,
-    endAt,
-    limit,
 } from "firebase/firestore";
 import { app } from '@/lib/firebase';
 
@@ -48,6 +45,9 @@ export default function UserDashboard() {
                     ...doc.data(),
                     date: doc.data().date ? new Date(doc.data().date.seconds * 1000) : new Date(),
                 })).filter(suggestion => suggestion.date instanceof Date); // Ensure date is a Date object
+
+                console.log('Fetched Suggestions:', fetchedSuggestions); // Debugging: Log fetched suggestions
+
                 setSuggestions(fetchedSuggestions);
             } catch (error) {
                 console.error('Error fetching suggestions:', error);
@@ -62,7 +62,11 @@ export default function UserDashboard() {
         if (!loading && user) {
             loadSuggestions();
         }
-    }, [user, loading, toast]);
+    }, [user, loading, router, toast]);
+
+    useEffect(() => {
+        console.log('Suggestions state updated:', suggestions); // Debugging: Log suggestions state
+    }, [suggestions]);
 
     if (loading) {
         return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
@@ -76,7 +80,7 @@ export default function UserDashboard() {
     return (
         <div className="container mx-auto py-10">
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold text-center">User Dashboard</h1>
+                <h1 className="text-3xl font-bold text-center flex-grow">User Dashboard</h1>
                <Link href="/" className="text-blue-600 hover:underline">
                     Home
                 </Link>
@@ -98,7 +102,7 @@ export default function UserDashboard() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {suggestions.length > 0 ? (
+                        {suggestions && suggestions.length > 0 ? (
                             suggestions.map(suggestion => (
                                 <TableRow key={suggestion.id}>
                                     <TableCell>{suggestion.title}</TableCell>
