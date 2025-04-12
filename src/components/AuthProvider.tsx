@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -14,7 +15,7 @@ import {
   signOut,
   onAuthStateChanged,
   updateProfile,
-  User,
+  User
 } from 'firebase/auth';
 import {initializeApp, getApp, FirebaseApp} from 'firebase/app';
 
@@ -23,36 +24,34 @@ import {initializeApp, getApp, FirebaseApp} from 'firebase/app';
 let firebaseApp: FirebaseApp;
 
 function createFirebaseApp() {
-  const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
 
-  const firebaseConfig = {
-    apiKey: apiKey,
-    authDomain: "safety-hub-lqzg4.firebaseapp.com",
-    projectId: "safety-hub-lqzg4",
-    storageBucket: "safety-hub-lqzg4.firebasestorage.app",
-    messagingSenderId: "379696949296",
-    appId: "1:379696949296:web:b96447ae38849fb80d65f5"
-  };
+    const firebaseConfig = {
+        apiKey: apiKey,
+        authDomain: "safety-hub-lqzg4.firebaseapp.com",
+        projectId: "safety-hub-lqzg4",
+        storageBucket: "safety-hub-lqzg4.firebasestorage.app",
+        messagingSenderId: "379696949296",
+        appId: "1:379696949296:web:b96447ae38849fb80d65f5"
+    };
 
     if (!apiKey) {
         console.error(
             'Firebase API key is missing. Make sure to set NEXT_PUBLIC_FIREBASE_API_KEY in your environment variables.'
         );
         return null;
-    }
+    }  
 
-  try {
-    firebaseApp = getApp();
-  } catch (e) {
+    try {
+        firebaseApp = getApp();
+    } catch (e) {
         if (!apiKey) {
-            console.error(
-                'Firebase API key is missing. Make sure to set NEXT_PUBLIC_FIREBASE_API_KEY in your environment variables.'
-            );
-            return null;
+            console.error('Firebase API key is missing. Make sure to set NEXT_PUBLIC_FIREBASE_API_KEY in your environment variables.');
+           return null;
         }
-    firebaseApp = initializeApp(firebaseConfig);
-  }
-  return firebaseApp;
+      firebaseApp = initializeApp(firebaseConfig);
+    }
+    return firebaseApp;
 }
 
 // Create a context for authentication
@@ -157,4 +156,4 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
 // Custom hook to use the authentication context
 export const useAuth = () => useContext(AuthContext);
 
-
+    
