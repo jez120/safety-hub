@@ -77,15 +77,15 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <SignIn />
-                <Link href="/signup" className="text-blue-600 hover:underline">
-                  Create an Account
-                </Link>
+                
               </CardContent>
             </Card>
           </div>
         ) : (
           <div className="mt-6 flex flex-col items-center gap-4">
-             <Button onClick={handleAdminLogin}>Admin Dashboard</Button>
+            {user.role === 'admin' && (
+              <Button onClick={handleAdminLogin}>Admin Dashboard</Button>
+            )}
           </div>
         )}
       </main>
