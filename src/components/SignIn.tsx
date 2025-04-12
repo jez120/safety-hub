@@ -49,9 +49,7 @@ export const SignIn = () => {
         />
       </div>
       <Button type="submit">Sign In</Button>
-       <Link href="/signup" className="text-blue-600 hover:underline">
-          Create an account
-        </Link>
+       
     </form>
   );
 };

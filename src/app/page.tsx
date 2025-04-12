@@ -64,9 +64,7 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <SignIn />
-                <Link href="/signup" className="text-blue-600 hover:underline">
-                  Create an account
-                </Link>
+                
               </CardContent>
             </Card>
           </div>
@@ -89,3 +87,4 @@ export default function Home() {
     </div>
   );
 }
+

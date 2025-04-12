@@ -8,50 +8,15 @@ import {
   ReactNode,
 } from 'react';
 import {
-  getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
   updateProfile,
-  User
+  User,
 } from 'firebase/auth';
-import {initializeApp, getApp, FirebaseApp} from 'firebase/app';
+import { app, auth } from '../lib/firebase'; // Import Firebase app and auth
 
-// Your web app's Firebase configuration
-
-let firebaseApp: FirebaseApp;
-
-function createFirebaseApp() {
-    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
-
-    const firebaseConfig = {
-        apiKey: apiKey,
-        authDomain: "safety-hub-lqzg4.firebaseapp.com",
-        projectId: "safety-hub-lqzg4",
-        storageBucket: "safety-hub-lqzg4.firebasestorage.app",
-        messagingSenderId: "379696949296",
-        appId: "1:379696949296:web:b96447ae38849fb80d65f5"
-    };
-
-    if (!apiKey) {
-        console.error(
-            'Firebase API key is missing. Make sure to set NEXT_PUBLIC_FIREBASE_API_KEY in your environment variables.'
-        );
-        return null;
-    }  
-
-    try {
-        firebaseApp = getApp();
-    } catch (e) {
-        if (!apiKey) {
-            console.error('Firebase API key is missing. Make sure to set NEXT_PUBLIC_FIREBASE_API_KEY in your environment variables.');
-           return null;
-        }
-      firebaseApp = initializeApp(firebaseConfig);
-    }
-    return firebaseApp;
-}
 
 // Create a context for authentication
 const AuthContext = createContext<{
@@ -76,14 +41,8 @@ const AuthContext = createContext<{
 export const AuthProvider = ({children}: {children: ReactNode}) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const app = createFirebaseApp();
 
   useEffect(() => {
-    if (!app) {
-      setLoading(false);
-      return;
-    }
-    const auth = getAuth(app);
     const unsubscribe = onAuthStateChanged(auth, user => {
       setUser(user);
       setLoading(false);
@@ -91,15 +50,11 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
 
     // Cleanup subscription on unmount
     return () => unsubscribe();
-  }, [app]);
+  }, []);
 
   // Sign-up function
   const signUp = async (email: string, password: string, displayName: string) => {
     try {
-      if (!app) {
-        throw new Error('Firebase app not initialized.');
-      }
-      const auth = getAuth(app);
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -118,10 +73,6 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
   // Sign-in function
   const signIn = async (email: string, password: string) => {
     try {
-      if (!app) {
-        throw new Error('Firebase app not initialized.');
-      }
-      const auth = getAuth(app);
       await signInWithEmailAndPassword(auth, email, password);
     } catch (error: any) {
       console.error('Signin failed:', error);
@@ -132,11 +83,6 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
   // Sign-out function
   const signOutUser = async () => {
     try {
-      if (!app) {
-        throw new Error('Firebase app not initialized.');
-      }
-      const auth = getAuth(app);
-
       await signOut(auth);
     } catch (error: any) {
       console.error('Signout failed:', error);
@@ -154,5 +100,3 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
 
 // Custom hook to use the authentication context
 export const useAuth = () => useContext(AuthContext);
-
-    
