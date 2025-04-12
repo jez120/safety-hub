@@ -35,7 +35,12 @@ function createFirebaseApp() {
   try {
     firebaseApp = getApp();
   } catch {
-    firebaseApp = initializeApp(firebaseConfig);
+    if (firebaseConfig.apiKey) {
+        firebaseApp = initializeApp(firebaseConfig);
+    } else {
+      console.error("Firebase API key is missing. Make sure to set NEXT_PUBLIC_FIREBASE_API_KEY in your environment variables.");
+      return null;
+    }
   }
   return firebaseApp;
 }
@@ -66,6 +71,10 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
 
   useEffect(() => {
     const app = createFirebaseApp();
+    if (!app) {
+        setLoading(false);
+        return;
+    }
     const auth = getAuth(app);
     const unsubscribe = onAuthStateChanged(auth, user => {
       setUser(user);
@@ -80,6 +89,9 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
   const signUp = async (email: string, password: string, displayName: string) => {
     try {
       const app = createFirebaseApp();
+      if (!app) {
+        throw new Error("Firebase app not initialized.");
+      }
       const auth = getAuth(app);
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -100,6 +112,9 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
   const signIn = async (email: string, password: string) => {
     try {
       const app = createFirebaseApp();
+       if (!app) {
+        throw new Error("Firebase app not initialized.");
+      }
       const auth = getAuth(app);
       await signInWithEmailAndPassword(auth, email, password);
     } catch (error: any) {
@@ -110,9 +125,13 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
 
   // Sign-out function
   const signOutUser = async () => {
+    try{
     const app = createFirebaseApp();
+     if (!app) {
+        throw new Error("Firebase app not initialized.");
+      }
     const auth = getAuth(app);
-    try {
+    
       await signOut(auth);
     } catch (error: any) {
       console.error('Signout failed:', error);
