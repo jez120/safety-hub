@@ -32,13 +32,15 @@ function createFirebaseApp() {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
     measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
   };
+  if (!firebaseConfig.apiKey) {
+    console.error(
+      'Firebase API key is missing. Make sure to set NEXT_PUBLIC_FIREBASE_API_KEY in your environment variables.'
+    );
+    return null;
+  }
   try {
     firebaseApp = getApp();
   } catch (e) {
-    if (!firebaseConfig.apiKey) {
-      console.error("Firebase API key is missing. Make sure to set NEXT_PUBLIC_FIREBASE_API_KEY in your environment variables.");
-      return null;
-    }
     firebaseApp = initializeApp(firebaseConfig);
   }
   return firebaseApp;
@@ -88,7 +90,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
   const signUp = async (email: string, password: string, displayName: string) => {
     try {
       if (!app) {
-        throw new Error("Firebase app not initialized.");
+        throw new Error('Firebase app not initialized.');
       }
       const auth = getAuth(app);
       const userCredential = await createUserWithEmailAndPassword(
@@ -109,8 +111,8 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
   // Sign-in function
   const signIn = async (email: string, password: string) => {
     try {
-       if (!app) {
-        throw new Error("Firebase app not initialized.");
+      if (!app) {
+        throw new Error('Firebase app not initialized.');
       }
       const auth = getAuth(app);
       await signInWithEmailAndPassword(auth, email, password);
@@ -122,12 +124,12 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
 
   // Sign-out function
   const signOutUser = async () => {
-    try{
-     if (!app) {
-        throw new Error("Firebase app not initialized.");
+    try {
+      if (!app) {
+        throw new Error('Firebase app not initialized.');
       }
-    const auth = getAuth(app);
-    
+      const auth = getAuth(app);
+
       await signOut(auth);
     } catch (error: any) {
       console.error('Signout failed:', error);
