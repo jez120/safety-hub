@@ -15,7 +15,8 @@ import {
   updateProfile,
   User,
 } from 'firebase/auth';
-import { app, auth } from '../lib/firebase'; // Import Firebase app and auth
+import {initializeApp, getApp, FirebaseApp} from 'firebase/app';
+import {app, auth} from '@/lib/firebase'; // Import Firebase app and auth
 
 
 // Create a context for authentication
@@ -37,12 +38,47 @@ const AuthContext = createContext<{
   loading: true,
 });
 
+let firebaseApp: FirebaseApp;
+
+function createFirebaseApp() {
+    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+
+    const firebaseConfig = {
+        apiKey: apiKey,
+        authDomain: "safety-hub-lqzg4.firebaseapp.com",
+        projectId: "safety-hub-lqzg4",
+        storageBucket: "safety-hub-lqzg4.firebasestorage.app",
+        messagingSenderId: "379696949296",
+        appId: "1:379696949296:web:b96447ae38849fb80d65f5"
+    };
+
+    if (!apiKey) {
+        console.error(
+            'Firebase API key is missing. Make sure to set NEXT_PUBLIC_FIREBASE_API_KEY in your environment variables.'
+        );
+        return null;
+    }  
+
+    try {
+        firebaseApp = getApp();
+    } catch (e) {
+        if (!apiKey) {
+            console.error('Firebase API key is missing. Make sure to set NEXT_PUBLIC_FIREBASE_API_KEY in your environment variables.');
+            return null;
+        }
+       firebaseApp = initializeApp(firebaseConfig);
+    }
+    return firebaseApp;
+}
+
+
 // AuthProvider component to manage authentication state
 export const AuthProvider = ({children}: {children: ReactNode}) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const auth = getAuth(app);
     const unsubscribe = onAuthStateChanged(auth, user => {
       setUser(user);
       setLoading(false);
@@ -55,6 +91,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
   // Sign-up function
   const signUp = async (email: string, password: string, displayName: string) => {
     try {
+        const auth = getAuth(app);
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -73,6 +110,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
   // Sign-in function
   const signIn = async (email: string, password: string) => {
     try {
+       const auth = getAuth(app);
       await signInWithEmailAndPassword(auth, email, password);
     } catch (error: any) {
       console.error('Signin failed:', error);
@@ -83,6 +121,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
   // Sign-out function
   const signOutUser = async () => {
     try {
+        const auth = getAuth(app);
       await signOut(auth);
     } catch (error: any) {
       console.error('Signout failed:', error);
