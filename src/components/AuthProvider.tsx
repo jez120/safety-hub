@@ -41,27 +41,30 @@ const AuthContext = createContext<{
 let firebaseApp: FirebaseApp;
 
 function createFirebaseApp() {
-  const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+
+    if (!apiKey) {
+        console.error(
+            'Firebase API key is missing. Make sure to set NEXT_PUBLIC_FIREBASE_API_KEY in your environment variables.'
+        );
+        return null;
+    }
 
     const firebaseConfig = {
-    apiKey: apiKey,
-    authDomain: "safety-hub-lqzg4.firebaseapp.com",
-    projectId: "safety-hub-lqzg4",
-    storageBucket: "safety-hub-lqzg4.firebasestorage.app",
-    messagingSenderId: "379696949296",
-    appId: "1:379696949296:web:b96447ae38849fb80d65f5"
-  };
-
+        apiKey: apiKey,
+        authDomain: "safety-hub-lqzg4.firebaseapp.com",
+        projectId: "safety-hub-lqzg4",
+        storageBucket: "safety-hub-lqzg4.firebasestorage.app",
+        messagingSenderId: "379696949296",
+        appId: "1:379696949296:web:b96447ae38849fb80d65f5"
+    };
   try {
     firebaseApp = getApp();
   } catch (e) {
-    
-           firebaseApp = initializeApp(firebaseConfig);
-    
+      firebaseApp = initializeApp(firebaseConfig);
   }
   return firebaseApp;
 }
-
 
 // AuthProvider component to manage authentication state
 export const AuthProvider = ({children}: {children: ReactNode}) => {
@@ -74,6 +77,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
           setLoading(false);
           return;
     }
+
       const auth = getAuth(app);
       const unsubscribe = onAuthStateChanged(auth, async user => {
           if (user) {
@@ -124,7 +128,13 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
       // Update the user's profile with the display name
       await updateProfile(userCredential.user, {displayName});
       // After updating the profile, update the local state
-      setUser(userCredential.user);
+       const db = getFirestore(app);
+            await setDoc(doc(db, "users", userCredential.user.uid), {
+                name: displayName,
+                email: email,
+                role: 'user', // default role
+            });
+      setUser(userCredential.user as User & { role: string });
     } catch (error: any) {
       console.error('Signup failed:', error);
       throw error; // Re-throw to handle it in the component
@@ -138,7 +148,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
       await signInWithEmailAndPassword(auth, email, password);
     }    catch (error: any) {
             console.error('Signin failed:', error);
-             if (error.message === 'Invalid email or password. Please check your credentials.') {
+             if (error.message === 'Firebase: Error (auth/invalid-credential).') {
                   throw new Error('Invalid email or password. Please check your credentials.');
               }
             throw error; // Re-throw to handle it in the component
@@ -166,3 +176,4 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
 
 // Custom hook to use the authentication context
 export const useAuth = () => useContext(AuthContext);
+
