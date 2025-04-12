@@ -18,6 +18,7 @@ import {
 } from 'firebase/auth';
 import {initializeApp, getApp, FirebaseApp} from 'firebase/app';
 import {getFirestore, doc, getDoc} from 'firebase/firestore';
+import {FirebaseError} from 'firebase/app';
 
 // Create a context for authentication
 const AuthContext = createContext<{
@@ -51,6 +52,13 @@ function createFirebaseApp() {
         messagingSenderId: "379696949296",
         appId: "1:379696949296:web:b96447ae38849fb80d65f5"
     };
+
+    if (!apiKey) {
+        console.error(
+            'Firebase API key is missing. Make sure to set NEXT_PUBLIC_FIREBASE_API_KEY in your environment variables.'
+        );
+        return null;
+    }
 
     try {
         firebaseApp = getApp();
@@ -144,10 +152,13 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
     try {
         const auth = getAuth(app);
       await signInWithEmailAndPassword(auth, email, password);
-    } catch (error: any) {
-      console.error('Signin failed:', error);
-      throw error; // Re-throw to handle it in the component
-    }
+    }    catch (error: any) {
+            console.error('Signin failed:', error);
+             if (error instanceof FirebaseError && error.code === 'auth/invalid-credential') {
+                  throw new Error('Invalid email or password. Please check your credentials.');
+              }
+            throw error; // Re-throw to handle it in the component
+        }
   };
 
   // Sign-out function
@@ -171,4 +182,3 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
 
 // Custom hook to use the authentication context
 export const useAuth = () => useContext(AuthContext);
-
