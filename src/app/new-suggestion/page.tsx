@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { categories } from '@/app/admin/page';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
-import {app} from '@/lib/firebase';
+import { app } from '@/lib/firebase';
 import Link from 'next/link';
 
 export default function NewSuggestionPage() {
@@ -22,6 +22,7 @@ export default function NewSuggestionPage() {
     const [title, setTitle] = useState('');
     const [category, setCategory] = useState(categories[0] || '');
     const [description, setDescription] = useState('');
+    const [attachment, setAttachment] = useState<File | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -50,6 +51,9 @@ export default function NewSuggestionPage() {
                 status: 'Open',
                 date: new Date(),
                 assignedTo: '',
+                attachmentName: attachment ? attachment.name : null,
+                // You would likely want to upload the file to Firebase Storage here and store the URL
+                // attachmentUrl: await uploadFile(attachment),
             });
 
             toast({
@@ -116,12 +120,27 @@ export default function NewSuggestionPage() {
                                     required
                                 />
                             </div>
+                            <div>
+                                <Label htmlFor="attachment">Attachment</Label>
+                                <Input
+                                    id="attachment"
+                                    type="file"
+                                    onChange={(e) => {
+                                        if (e.target.files && e.target.files.length > 0) {
+                                            setAttachment(e.target.files[0]);
+                                        }
+                                    }}
+                                />
+                                {attachment && (
+                                    <p>Selected file: {attachment.name}</p>
+                                )}
+                            </div>
                             <Button type="submit" disabled={isSubmitting}>
                                 {isSubmitting ? 'Submitting...' : 'Submit Suggestion'}
                             </Button>
-                             <Link href="/" className="text-blue-600 hover:underline">
-                                    Home
-                             </Link>
+                            <Link href="/" className="text-blue-600 hover:underline">
+                                Home
+                            </Link>
                         </form>
                     </CardContent>
                 </Card>
@@ -129,4 +148,3 @@ export default function NewSuggestionPage() {
         </div>
     );
 }
-
