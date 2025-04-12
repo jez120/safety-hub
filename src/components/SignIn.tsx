@@ -22,8 +22,8 @@ export const SignIn = () => {
         title: 'Sign in successful',
         description: 'You have successfully signed in.',
       });
-    } catch (error) {
-      if (error instanceof FirebaseError && error.code === 'auth/invalid-credential') {
+    } catch (error: any) {
+      if (error.message === 'Invalid email or password. Please check your credentials.') {
         toast({
           variant: 'destructive',
           title: 'Sign in failed',
@@ -62,4 +62,3 @@ export const SignIn = () => {
     </form>
   );
 };
-

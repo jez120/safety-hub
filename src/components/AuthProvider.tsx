@@ -18,7 +18,6 @@ import {
 } from 'firebase/auth';
 import {initializeApp, getApp, FirebaseApp} from 'firebase/app';
 import {getFirestore, doc, getDoc} from 'firebase/firestore';
-import {FirebaseError} from 'firebase/app';
 
 // Create a context for authentication
 const AuthContext = createContext<{
@@ -42,16 +41,16 @@ const AuthContext = createContext<{
 let firebaseApp: FirebaseApp;
 
 function createFirebaseApp() {
-    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+  const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
 
     const firebaseConfig = {
-        apiKey: apiKey,
-        authDomain: "safety-hub-lqzg4.firebaseapp.com",
-        projectId: "safety-hub-lqzg4",
-        storageBucket: "safety-hub-lqzg4.firebasestorage.app",
-        messagingSenderId: "379696949296",
-        appId: "1:379696949296:web:b96447ae38849fb80d65f5"
-    };
+    apiKey: apiKey,
+    authDomain: "safety-hub-lqzg4.firebaseapp.com",
+    projectId: "safety-hub-lqzg4",
+    storageBucket: "safety-hub-lqzg4.firebasestorage.app",
+    messagingSenderId: "379696949296",
+    appId: "1:379696949296:web:b96447ae38849fb80d65f5"
+  };
 
     if (!apiKey) {
         console.error(
@@ -60,20 +59,14 @@ function createFirebaseApp() {
         return null;
     }
 
-    try {
-        firebaseApp = getApp();
-    } catch (e) {
-        if (!apiKey) {
-            console.error('Firebase API key is missing. Make sure to set NEXT_PUBLIC_FIREBASE_API_KEY in your environment variables.');
-        }
-        try{
+  try {
+    firebaseApp = getApp();
+  } catch (e) {
+    
            firebaseApp = initializeApp(firebaseConfig);
-        } catch(e2:any){
-            console.error("Firebase initialization error", e2.message)
-            return null;
-        }
-    }
-    return firebaseApp;
+    
+  }
+  return firebaseApp;
 }
 
 
@@ -84,12 +77,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
   const app = createFirebaseApp();
 
   useEffect(() => {
-    if (!app) {
-          console.error("Firebase app initialization failed.");
-          setLoading(false);
-          return;
-    }
-
+    
       const auth = getAuth(app);
       const unsubscribe = onAuthStateChanged(auth, async user => {
           if (user) {
@@ -154,7 +142,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
       await signInWithEmailAndPassword(auth, email, password);
     }    catch (error: any) {
             console.error('Signin failed:', error);
-             if (error instanceof FirebaseError && error.code === 'auth/invalid-credential') {
+             if (error.message === 'Invalid email or password. Please check your credentials.') {
                   throw new Error('Invalid email or password. Please check your credentials.');
               }
             throw error; // Re-throw to handle it in the component
@@ -182,3 +170,5 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
 
 // Custom hook to use the authentication context
 export const useAuth = () => useContext(AuthContext);
+
+
