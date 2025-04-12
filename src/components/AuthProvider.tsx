@@ -45,6 +45,12 @@ function createFirebaseApp() {
   try {
     firebaseApp = getApp();
   } catch (e) {
+        if (!apiKey) {
+            console.error(
+                'Firebase API key is missing. Make sure to set NEXT_PUBLIC_FIREBASE_API_KEY in your environment variables.'
+            );
+            return null;
+        }
     firebaseApp = initializeApp(firebaseConfig);
   }
   return firebaseApp;
