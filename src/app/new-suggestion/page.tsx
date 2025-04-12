@@ -61,7 +61,7 @@ export default function NewSuggestionPage() {
                 description: 'Your suggestion has been submitted successfully.',
             });
 
-            router.push('/');
+            router.push('/user');
         } catch (error) {
             console.error('Error submitting suggestion:', error);
             toast({
@@ -138,7 +138,7 @@ export default function NewSuggestionPage() {
                             <Button type="submit" disabled={isSubmitting}>
                                 {isSubmitting ? 'Submitting...' : 'Submit Suggestion'}
                             </Button>
-                            <Link href="/" className="text-blue-600 hover:underline">
+                            <Link href="/user" className="text-blue-600 hover:underline">
                                 Home
                             </Link>
                         </form>
