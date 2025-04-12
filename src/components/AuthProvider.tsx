@@ -52,13 +52,6 @@ function createFirebaseApp() {
     appId: "1:379696949296:web:b96447ae38849fb80d65f5"
   };
 
-    if (!apiKey) {
-        console.error(
-            'Firebase API key is missing. Make sure to set NEXT_PUBLIC_FIREBASE_API_KEY in your environment variables.'
-        );
-        return null;
-    }
-
   try {
     firebaseApp = getApp();
   } catch (e) {

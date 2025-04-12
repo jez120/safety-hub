@@ -35,6 +35,8 @@ import {
 } from "firebase/firestore";
 import {app} from '@/lib/firebase';
 import {useToast} from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/components/AuthProvider';
 
 ChartJS.register(
   CategoryScale,
@@ -79,38 +81,64 @@ const chartOptions = {
 
 export {categories, users}
 
+async function checkAdminStatus() {
+    return true; // Replace with your actual implementation
+}
+
 export default function AdminPage() {
   const [suggestions, setSuggestions] = useState([]);
+  const router = useRouter();
+  const { toast } = useToast();
+    const { user, loading } = useAuth();
   const [open, setOpen] = useState(false);
   const [selectedSuggestion, setSelectedSuggestion] = useState(null);
-   const { toast } = useToast()
 
   useEffect(() => {
     async function loadSuggestions() {
       const db = getFirestore(app);
       const suggestionsCollection = collection(db, 'suggestions');
       const q = query(suggestionsCollection, orderBy('date', 'desc'));
-
       try {
         const querySnapshot = await getDocs(q);
         const fetchedSuggestions = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
           date: doc.data().date ? new Date(doc.data().date.seconds * 1000) : new Date(),
-        }));
+        })).filter(suggestion => suggestion.date instanceof Date); // Ensure date is a Date object
         setSuggestions(fetchedSuggestions);
       } catch (error) {
         console.error('Error fetching suggestions:', error);
-         toast({
-             variant: 'destructive',
-             title: 'Failed to load suggestions',
-             description: 'There was an error loading suggestions from the database.',
-         });
+        toast({ variant: 'destructive', title: 'Failed to load suggestions', description: 'There was an error loading suggestions from the database.', });
       }
     }
 
-    loadSuggestions();
-  }, [toast]);
+      async function checkAdmin() {
+        if (!user) {
+            return;
+        }
+        if (user.role !== 'admin') {
+              toast({
+                  title: "Unauthorized",
+                  description: "You do not have permission to access this page.", variant: "destructive"
+              });
+              router.push('/user');
+          } else {
+              loadSuggestions();
+          }
+      }
+
+      if (!loading) {
+          checkAdmin();
+      }
+  }, [user, loading, router, toast]);
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
+    if (!user || user.role !== 'admin') {
+        return null; // Or redirect, or show an error message
+    }
 
   const handleUpdateStatus = async (id: string, newStatus: string) => {
       try {

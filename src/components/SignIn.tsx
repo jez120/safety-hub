@@ -16,7 +16,7 @@ export const SignIn = () => {
 
   const handleSubmit = async e => {
     e.preventDefault();
-        setErrorMessage('');
+    setErrorMessage('');
     try {
       await signIn(email, password);
       toast({
@@ -68,7 +68,7 @@ export const SignIn = () => {
         />
       </div>
              {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-      <Button type="submit">Sign In</Button>
+      <Button type="submit" disabled={loading}>Sign In</Button>
        <Link href="/signup" className="text-blue-600 hover:underline">
         Create an account
       </Link>

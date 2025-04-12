@@ -10,6 +10,11 @@ import {Input} from '@/components/ui/input';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import {useToast} from "@/hooks/use-toast";
 
+async function getUserRole(userId: string): Promise<{ isAdmin: boolean }> {
+  // Replace this with your actual implementation to fetch the user's role from your database
+  return { isAdmin: false };
+}
+
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,6 +28,7 @@ function LoginPage() {
 
   // Function to handle form submission
   const handleLogin = async (event) => {
+    const router = useRouter();
     event.preventDefault(); // Prevent page reload
     setLoading(true);
     setErrorMessage(''); // Clear any previous error messages
@@ -36,7 +42,13 @@ function LoginPage() {
       // Redirect to the home page or dashboard after successful login
       // You might want to check the user's role here first before redirecting
       // For now, just redirecting to home page:
-      router.push('/'); // <-- ADJUST Redirect PATH if needed
+      const role = await getUserRole(userCredential.user.uid);
+      if (role.isAdmin) {
+        router.push('/admin');
+      } else {
+        router.push('/user');
+      }
+
 
     } catch (error) {
       // --- FAILURE ---
