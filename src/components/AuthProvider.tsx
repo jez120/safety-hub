@@ -26,13 +26,12 @@ function createFirebaseApp() {
   const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
 
   const firebaseConfig = {
-    apiKey: apiKey,
-    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-    measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+    apiKey: "AIzaSyCtKY5zTz9_rAfagyC0B6xmflKl0d3jRlo",
+    authDomain: "safety-hub-lqzg4.firebaseapp.com",
+    projectId: "safety-hub-lqzg4",
+    storageBucket: "safety-hub-lqzg4.firebasestorage.app",
+    messagingSenderId: "379696949296",
+    appId: "1:379696949296:web:b96447ae38849fb80d65f5"
   };
 
     if (!apiKey) {
@@ -157,3 +156,4 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
 
 // Custom hook to use the authentication context
 export const useAuth = () => useContext(AuthContext);
+
