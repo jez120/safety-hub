@@ -130,7 +130,7 @@ export default function Home() {
                           <TableHead>Status</TableHead>
                           <TableHead>Date</TableHead>
                           <TableHead>Assigned To</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
+                          
                       </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -141,11 +141,7 @@ export default function Home() {
                               <TableCell>{suggestion.status}</TableCell>
                               <TableCell>{format(suggestion.date, 'MM/dd/yyyy')}</TableCell>
                               <TableCell>{suggestion.assignedTo}</TableCell>
-                              <TableCell className="text-right">
-                                  <Button size="sm" >
-                                      View
-                                  </Button>
-                              </TableCell>
+                              
                           </TableRow>
                       ))}
                   </TableBody>
