@@ -71,7 +71,7 @@ export default function SignUpPage() {
                     </div>
                     <Button type="submit">Sign Up</Button>
                     <Link href="/" className="text-blue-600 hover:underline">
-                        Back to Landing Page
+                        Home
                     </Link>
                  </form>
               </CardContent>

@@ -170,7 +170,7 @@ export default function AdminPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Admin Dashboard</h1>
         <Link href="/" className="text-blue-600 hover:underline">
-          Back to Landing Page
+          Home
         </Link>
       </div>
 
@@ -366,4 +366,5 @@ function SuggestionDialog({open, onClose, suggestion, onSave}) {
     </Dialog>
   );
 }
+
 
