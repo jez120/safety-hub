@@ -1,11 +1,14 @@
 'use client'
 
 import { useState } from 'react';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'; // Import getAuth
 import { app } from '../lib/firebase'; // <-- ADJUST PATH if needed
 import { useRouter } from 'next/navigation';
 import Link from 'next/link'; // Optional: for signup link
 import {Button} from '@/components/ui/button';
+import {Input} from '@/components/ui/input';
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
+import {useToast} from "@/hooks/use-toast";
 
 function LoginPage() {
   const [email, setEmail] = useState('');
@@ -13,6 +16,8 @@ function LoginPage() {
   const [errorMessage, setErrorMessage] = useState(''); // To store and display error messages
   const [loading, setLoading] = useState(false); // To show loading state on button
   const router = useRouter();
+  const { toast } = useToast()
+
     // Initialize Firebase auth
     const auth = getAuth(app);
 
@@ -47,12 +52,27 @@ function LoginPage() {
         case 'auth/wrong-password':
         case 'auth/invalid-credential':
           friendlyMessage = 'Incorrect email or password entered.';
+            toast({
+                variant: 'destructive',
+                title: 'Authentication failed',
+                description: 'Invalid credentials'
+            })
           break;
         case 'auth/too-many-requests':
           friendlyMessage = 'Access temporarily disabled due to too many failed login attempts. You can reset your password or try again later.';
+           toast({
+                variant: 'destructive',
+                title: 'Authentication failed',
+                description: 'Too many attempts'
+            })
           break;
         case 'auth/user-disabled':
           friendlyMessage = 'This user account has been disabled.';
+           toast({
+                variant: 'destructive',
+                title: 'Authentication failed',
+                description: 'Account disabled'
+            })
           break;
         // Add other specific Firebase Auth error codes if needed
       }
@@ -64,121 +84,49 @@ function LoginPage() {
   };
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>Safety Hub Login</h1>
-      <form onSubmit={handleLogin} style={styles.form}>
-        <div style={styles.inputGroup}>
-          <label htmlFor="login-email" style={styles.label}>Email:</label>
-          <input
-            type="email"
-            id="login-email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={styles.input}
-            placeholder="Enter your email"
-          />
-        </div>
-        <div style={styles.inputGroup}>
-          <label htmlFor="login-password" style={styles.label}>Password:</label>
-          <input
-            type="password"
-            id="login-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={styles.input}
-            placeholder="Enter your password"
-          />
-        </div>
-
-        {/* Display Error Message */}
-        {errorMessage && (
-          <p style={styles.errorMessage}>
+       <div className="flex flex-col items-center justify-center min-h-screen py-2">
+      <main className="flex flex-col items-center justify-center w-full flex-1 px-20 text-center">
+       <Card className="w-96">
+              <CardHeader>
+                <CardTitle>Safety Hub Login</CardTitle>
+                <CardDescription>Enter your credentials to log in</CardDescription>
+              </CardHeader>
+              <CardContent>
+                 <form onSubmit={handleLogin} className="flex flex-col gap-4">
+                    <div>
+                       <Input
+                        type="email"
+                        placeholder="Email"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        />
+                    </div>
+                    <div>
+                         <Input
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        />
+                    </div>
+                      {errorMessage && (
+          <p style={{ color: 'red' }}>
             {errorMessage}
           </p>
         )}
-
-        <Button type="submit" disabled={loading} style={styles.button}>
-          {loading ? 'Logging In...' : 'Login'}
-        </Button>
-              <Link href="/signup" className="text-blue-600 hover:underline">
-        Create an account
-      </Link>
-      </form>
-      {/* Optional: Link to Signup Page */}
-      {/* <p style={styles.signupLink}>
-        Don't have an account? <Link href="/signup">Sign Up</Link>
-      </p> */}
-    </div>
+                    <Button type="submit" disabled={loading}>
+                         {loading ? 'Logging In...' : 'Login'}
+                    </Button>
+                     <Link href="/signup" className="text-blue-600 hover:underline">
+                        Create an account
+                    </Link>
+                 </form>
+              </CardContent>
+            </Card>
+          </main>
+     </div>
   );
 }
 
-// Basic Styling (you can replace this with your own CSS or styling library)
-const styles = {
-  container: {
-    maxWidth: '400px',
-    margin: '50px auto',
-    padding: '30px',
-    border: '1px solid #ccc',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-    fontFamily: 'sans-serif',
-  },
-  title: {
-    textAlign: 'center',
-    color: '#333',
-    marginBottom: '25px',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  inputGroup: {
-    marginBottom: '15px',
-  },
-  label: {
-    display: 'block',
-    marginBottom: '5px',
-    color: '#555',
-    fontWeight: 'bold',
-  },
-  input: {
-    width: '100%',
-    padding: '10px',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
-    boxSizing: 'border-box', // Include padding in width
-  },
-  errorMessage: {
-    color: 'red',
-    backgroundColor: '#ffebee',
-    border: '1px solid red',
-    padding: '10px',
-    borderRadius: '4px',
-    textAlign: 'center',
-    marginBottom: '15px',
-    fontSize: '0.9em',
-  },
-  button: {
-    padding: '12px 15px',
-    backgroundColor: '#007bff',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontSize: '1em',
-    transition: 'background-color 0.2s ease',
-  },
-  // button:disabled: { // Add styling for disabled button if needed via CSS classes
-  //   backgroundColor: '#ccc',
-  //   cursor: 'not-allowed',
-  // },
-  signupLink: {
-    textAlign: 'center',
-    marginTop: '20px',
-    fontSize: '0.9em',
-  }
-};
 
 export default LoginPage;
