@@ -7,16 +7,17 @@ import {useAuth} from '@/components/AuthProvider';
 import {SignIn} from '@/components/SignIn';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import Link from 'next/link';
-import {useEffect} from 'react';
+import {useEffect, useState} from 'react';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
+import {format} from 'date-fns';
+import {collection, query, where, getDocs, getFirestore} from 'firebase/firestore';
+import {app} from '@/lib/firebase';
 
 export default function Home() {
   const {toast} = useToast();
   const router = useRouter();
   const {user, signOutUser, loading} = useAuth();
-
-  const handleAdminLogin = () => {
-    router.push('/admin'); // Redirect to admin page
-  };
+  const [suggestions, setSuggestions] = useState([]);
 
   const handleLogout = async () => {
     try {
@@ -34,6 +35,39 @@ export default function Home() {
       });
     }
   };
+
+  const handleAddSuggestion = () => {
+    router.push('/new-suggestion');
+  };
+
+  useEffect(() => {
+    async function loadSuggestions() {
+      if (user) {
+        const db = getFirestore(app);
+        const suggestionsCollection = collection(db, 'suggestions');
+        const q = query(suggestionsCollection, where('userId', '==', user.uid));
+
+        try {
+          const querySnapshot = await getDocs(q);
+          const fetchedSuggestions = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            date: doc.data().date ? new Date(doc.data().date.seconds * 1000) : new Date(),
+          }));
+          setSuggestions(fetchedSuggestions);
+        } catch (error) {
+          console.error('Error fetching suggestions:', error);
+          toast({
+            variant: 'destructive',
+            title: 'Failed to load suggestions',
+            description: 'There was an error loading your suggestions. Please try again.',
+          });
+        }
+      }
+    }
+
+    loadSuggestions();
+  }, [user, toast]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -80,11 +114,44 @@ export default function Home() {
                 
               </CardContent>
             </Card>
+             <Link href="/signup" className="text-blue-600 hover:underline">
+                        Create an account
+                    </Link>
           </div>
         ) : (
           <div className="mt-6 flex flex-col items-center gap-4">
+            <Button onClick={handleAddSuggestion}>Add New Suggestion</Button>
+              <h2 className="text-2xl font-semibold mb-4">Your Suggestions</h2>
+              <Table>
+                  <TableHeader>
+                      <TableRow>
+                          <TableHead>Title</TableHead>
+                          <TableHead>Category</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Assigned To</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                      {suggestions.map(suggestion => (
+                          <TableRow key={suggestion.id}>
+                              <TableCell>{suggestion.title}</TableCell>
+                              <TableCell>{suggestion.category}</TableCell>
+                              <TableCell>{suggestion.status}</TableCell>
+                              <TableCell>{format(suggestion.date, 'MM/dd/yyyy')}</TableCell>
+                              <TableCell>{suggestion.assignedTo}</TableCell>
+                              <TableCell className="text-right">
+                                  <Button size="sm" >
+                                      View
+                                  </Button>
+                              </TableCell>
+                          </TableRow>
+                      ))}
+                  </TableBody>
+              </Table>
             {user.role === 'admin' && (
-              <Button onClick={handleAdminLogin}>Admin Dashboard</Button>
+              <Button onClick={() => router.push('/admin')}>Admin Dashboard</Button>
             )}
           </div>
         )}

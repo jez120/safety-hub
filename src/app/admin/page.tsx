@@ -23,6 +23,18 @@ import {
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import Link from 'next/link';
+import {
+  collection,
+  query,
+  orderBy,
+  getDocs,
+  getFirestore,
+  doc,
+  updateDoc,
+  deleteDoc,
+} from "firebase/firestore";
+import {app} from '@/lib/firebase';
+import {useToast} from '@/hooks/use-toast';
 
 ChartJS.register(
   CategoryScale,
@@ -32,45 +44,6 @@ ChartJS.register(
   Tooltip,
   Legend
 );
-
-const sampleSuggestions = [
-  {
-    id: '1',
-    title: 'Fire Safety Suggestion',
-    category: 'Fire Safety',
-    status: 'Open',
-    description: 'Implement regular fire drills and ensure all fire extinguishers are easily accessible.',
-    date: new Date(),
-    assignedTo: 'John Doe',
-  },
-  {
-    id: '2',
-    title: 'Electrical Safety Suggestion',
-    category: 'Electrical Safety',
-    status: 'In Progress',
-    description: 'Regularly inspect electrical cords and outlets for damage.',
-    date: new Date(),
-    assignedTo: 'Jane Smith',
-  },
-  {
-    id: '3',
-    title: 'Chemical Safety Suggestion',
-    category: 'Chemical Safety',
-    status: 'Closed',
-    description: 'Improve labeling of chemical containers and provide better ventilation in storage areas.',
-    date: new Date(),
-    assignedTo: 'John Doe',
-  },
-  {
-    id: '4',
-    title: 'Fall Protection Suggestion',
-    category: 'Fall Protection',
-    status: 'Open',
-    description: 'Install guardrails on elevated platforms and provide fall protection training.',
-    date: new Date(),
-    assignedTo: 'Jane Smith',
-  },
-];
 
 const categories = [
   "Fire Safety",
@@ -104,23 +77,64 @@ const chartOptions = {
   },
 };
 
+export {categories, users}
+
 export default function AdminPage() {
-  const [suggestions, setSuggestions] = useState(sampleSuggestions);
+  const [suggestions, setSuggestions] = useState([]);
   const [open, setOpen] = useState(false);
   const [selectedSuggestion, setSelectedSuggestion] = useState(null);
+   const { toast } = useToast()
 
   useEffect(() => {
-    // Simulate fetching suggestions from an API
-    // In a real application, you would fetch data from a database
-    // and update the suggestions state accordingly.
-  }, []);
+    async function loadSuggestions() {
+      const db = getFirestore(app);
+      const suggestionsCollection = collection(db, 'suggestions');
+      const q = query(suggestionsCollection, orderBy('date', 'desc'));
 
-  const handleUpdateStatus = (id: string, newStatus: string) => {
-    setSuggestions(
-      suggestions.map(suggestion =>
-        suggestion.id === id ? {...suggestion, status: newStatus} : suggestion
-      )
-    );
+      try {
+        const querySnapshot = await getDocs(q);
+        const fetchedSuggestions = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          date: doc.data().date ? new Date(doc.data().date.seconds * 1000) : new Date(),
+        }));
+        setSuggestions(fetchedSuggestions);
+      } catch (error) {
+        console.error('Error fetching suggestions:', error);
+         toast({
+             variant: 'destructive',
+             title: 'Failed to load suggestions',
+             description: 'There was an error loading suggestions from the database.',
+         });
+      }
+    }
+
+    loadSuggestions();
+  }, [toast]);
+
+  const handleUpdateStatus = async (id: string, newStatus: string) => {
+      try {
+          const db = getFirestore(app);
+          const suggestionDocRef = doc(db, 'suggestions', id);
+          await updateDoc(suggestionDocRef, { status: newStatus });
+
+          setSuggestions(
+              suggestions.map(suggestion =>
+                  suggestion.id === id ? { ...suggestion, status: newStatus } : suggestion
+              )
+          );
+          toast({
+              title: 'Suggestion updated',
+              description: `Suggestion status updated to ${newStatus}.`,
+          });
+      } catch (error) {
+          console.error('Error updating suggestion status:', error);
+          toast({
+              variant: 'destructive',
+              title: 'Failed to update suggestion',
+              description: 'There was an error updating the suggestion status.',
+          });
+      }
   };
 
   const handleOpenDialog = (suggestion) => {
@@ -133,12 +147,35 @@ export default function AdminPage() {
     setSelectedSuggestion(null);
   };
 
-  const handleSaveSuggestion = (updatedSuggestion) => {
-    setSuggestions(
-      suggestions.map(suggestion =>
-        suggestion.id === updatedSuggestion.id ? updatedSuggestion : suggestion
-      )
-    );
+  const handleSaveSuggestion = async (updatedSuggestion) => {
+       try {
+           const db = getFirestore(app);
+           const suggestionDocRef = doc(db, 'suggestions', updatedSuggestion.id);
+           await updateDoc(suggestionDocRef, {
+               title: updatedSuggestion.title,
+               category: updatedSuggestion.category,
+               status: updatedSuggestion.status,
+               description: updatedSuggestion.description,
+               assignedTo: updatedSuggestion.assignedTo,
+           });
+
+           setSuggestions(
+               suggestions.map(suggestion =>
+                   suggestion.id === updatedSuggestion.id ? updatedSuggestion : suggestion
+               )
+           );
+           toast({
+               title: 'Suggestion saved',
+               description: 'Suggestion details have been updated successfully.',
+           });
+       } catch (error) {
+           console.error('Error saving suggestion:', error);
+           toast({
+               variant: 'destructive',
+               title: 'Failed to save suggestion',
+               description: 'There was an error saving the suggestion details.',
+           });
+       }
     handleCloseDialog();
   };
 
@@ -366,5 +403,3 @@ function SuggestionDialog({open, onClose, suggestion, onSave}) {
     </Dialog>
   );
 }
-
-
