@@ -7,6 +7,7 @@ import {useAuth} from '@/components/AuthProvider';
 import {SignIn} from '@/components/SignIn';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import Link from 'next/link';
+import {useEffect} from 'react';
 
 export default function Home() {
   const {toast} = useToast();
@@ -24,6 +25,7 @@ export default function Home() {
         title: 'Logout',
         description: 'You have been logged out.',
       });
+      router.refresh()
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -33,12 +35,23 @@ export default function Home() {
     }
   };
 
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/');
+    }
+  }, [user, loading, router]);
+
   if (loading) {
     return <div>Loading...</div>;
   }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-2">
+       {user && (
+            <div className="absolute top-4 right-4">
+              <Button onClick={handleLogout}>Logout</Button>
+            </div>
+          )}
       <main className="flex flex-col items-center justify-center w-full flex-1 px-20 text-center">
         <h1 className="text-6xl font-bold">
           Welcome to{' '}
@@ -64,16 +77,17 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <SignIn />
-                
+                <Link href="/signup" className="text-blue-600 hover:underline">
+                  Create an Account
+                </Link>
               </CardContent>
             </Card>
           </div>
         ) : (
           <div className="mt-6 flex flex-col items-center gap-4">
-            <Button onClick={handleLogout}>Logout</Button>
+             <Button onClick={handleAdminLogin}>Admin Dashboard</Button>
           </div>
         )}
-        <Button onClick={handleAdminLogin}>Admin Dashboard</Button>
       </main>
 
       <footer className="flex items-center justify-center w-full h-24 border-t">
@@ -87,4 +101,3 @@ export default function Home() {
     </div>
   );
 }
-
