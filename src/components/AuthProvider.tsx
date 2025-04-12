@@ -26,7 +26,7 @@ function createFirebaseApp() {
   const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
 
   const firebaseConfig = {
-    apiKey: "AIzaSyCtKY5zTz9_rAfagyC0B6xmflKl0d3jRlo",
+    apiKey: apiKey,
     authDomain: "safety-hub-lqzg4.firebaseapp.com",
     projectId: "safety-hub-lqzg4",
     storageBucket: "safety-hub-lqzg4.firebasestorage.app",
@@ -156,4 +156,5 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
 
 // Custom hook to use the authentication context
 export const useAuth = () => useContext(AuthContext);
+
 
