@@ -6,6 +6,7 @@ import {Input} from '@/components/ui/input';
 import {useAuth} from '@/components/AuthProvider';
 import {useToast} from '@/hooks/use-toast';
 import Link from 'next/link';
+import {FirebaseError} from 'firebase/app';
 
 export const SignIn = () => {
   const [email, setEmail] = useState('');
@@ -22,11 +23,19 @@ export const SignIn = () => {
         description: 'You have successfully signed in.',
       });
     } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Sign in failed',
-        description: 'Invalid credentials. Please try again.',
-      });
+      if (error instanceof FirebaseError && error.code === 'auth/invalid-credential') {
+        toast({
+          variant: 'destructive',
+          title: 'Sign in failed',
+          description: 'Invalid email or password. Please check your credentials.',
+        });
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Sign in failed',
+          description: 'An unexpected error occurred. Please try again.',
+        });
+      }
     }
   };
 
@@ -55,4 +64,3 @@ export const SignIn = () => {
     </form>
   );
 };
-
