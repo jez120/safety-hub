@@ -16,21 +16,29 @@ import {
   updateProfile,
   User,
 } from 'firebase/auth';
-import {initializeApp} from 'firebase/app';
+import {initializeApp, getApp, FirebaseApp} from 'firebase/app';
 
 // Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
-};
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+let firebaseApp: FirebaseApp;
+
+function createFirebaseApp() {
+  const firebaseConfig = {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+    measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+  };
+  try {
+    firebaseApp = getApp();
+  } catch {
+    firebaseApp = initializeApp(firebaseConfig);
+  }
+  return firebaseApp;
+}
 
 // Create a context for authentication
 const AuthContext = createContext<{
@@ -57,6 +65,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const app = createFirebaseApp();
     const auth = getAuth(app);
     const unsubscribe = onAuthStateChanged(auth, user => {
       setUser(user);
@@ -69,8 +78,9 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
 
   // Sign-up function
   const signUp = async (email: string, password: string, displayName: string) => {
-    const auth = getAuth(app);
     try {
+      const app = createFirebaseApp();
+      const auth = getAuth(app);
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -80,7 +90,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
       await updateProfile(userCredential.user, {displayName});
       // After updating the profile, update the local state
       setUser(userCredential.user);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Signup failed:', error);
       throw error; // Re-throw to handle it in the component
     }
@@ -88,10 +98,11 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
 
   // Sign-in function
   const signIn = async (email: string, password: string) => {
-    const auth = getAuth(app);
     try {
+      const app = createFirebaseApp();
+      const auth = getAuth(app);
       await signInWithEmailAndPassword(auth, email, password);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Signin failed:', error);
       throw error; // Re-throw to handle it in the component
     }
@@ -99,10 +110,11 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
 
   // Sign-out function
   const signOutUser = async () => {
+    const app = createFirebaseApp();
     const auth = getAuth(app);
     try {
       await signOut(auth);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Signout failed:', error);
     }
   };
