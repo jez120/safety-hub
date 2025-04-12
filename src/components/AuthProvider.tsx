@@ -32,12 +32,14 @@ function createFirebaseApp() {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
     measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
   };
-  if (!firebaseConfig.apiKey) {
-    console.error(
-      'Firebase API key is missing. Make sure to set NEXT_PUBLIC_FIREBASE_API_KEY in your environment variables.'
-    );
-    return null;
-  }
+
+    if (!firebaseConfig.apiKey) {
+        console.error(
+            'Firebase API key is missing. Make sure to set NEXT_PUBLIC_FIREBASE_API_KEY in your environment variables.'
+        );
+        return null;
+    }
+
   try {
     firebaseApp = getApp();
   } catch (e) {
