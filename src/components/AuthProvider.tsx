@@ -41,28 +41,29 @@ const AuthContext = createContext<{
 let firebaseApp: FirebaseApp;
 
 function createFirebaseApp() {
-  const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
 
-  const firebaseConfig = {
-    apiKey: apiKey,
-    authDomain: "safety-hub-lqzg4.firebaseapp.com",
-    projectId: "safety-hub-lqzg4",
-    storageBucket: "safety-hub-lqzg4.firebasestorage.app",
-    messagingSenderId: "379696949296",
-    appId: "1:379696949296:web:b96447ae38849fb80d65f5"
-  };
-
-    if (!apiKey) {
-        console.error(
-            'Firebase API key is missing. Make sure to set NEXT_PUBLIC_FIREBASE_API_KEY in your environment variables.'
-        );
-        return null;
-    }  
+    const firebaseConfig = {
+        apiKey: apiKey,
+        authDomain: "safety-hub-lqzg4.firebaseapp.com",
+        projectId: "safety-hub-lqzg4",
+        storageBucket: "safety-hub-lqzg4.firebasestorage.app",
+        messagingSenderId: "379696949296",
+        appId: "1:379696949296:web:b96447ae38849fb80d65f5"
+    };
 
     try {
         firebaseApp = getApp();
     } catch (e) {
-        firebaseApp = initializeApp(firebaseConfig);
+        if (!apiKey) {
+            console.error('Firebase API key is missing. Make sure to set NEXT_PUBLIC_FIREBASE_API_KEY in your environment variables.');
+        }
+        try{
+           firebaseApp = initializeApp(firebaseConfig);
+        } catch(e2:any){
+            console.error("Firebase initialization error", e2.message)
+            return null;
+        }
     }
     return firebaseApp;
 }
@@ -105,12 +106,13 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
                   }
               } catch (error) {
                   console.error("Failed to fetch user role:", error);
-+                 setUser(user as User & { role: string }); // Still set user, but without role
+                  setUser(user as User & { role: string }); // Still set user, but without role
               } finally {
                   setLoading(false);
               }
           } else {
               setUser(null);
+              setLoading(false);
           }
     });
 
