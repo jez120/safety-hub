@@ -1,3 +1,4 @@
+
 'use client';
 
 import {Button} from '@/components/ui/button';
@@ -114,9 +115,7 @@ export default function Home() {
                 
               </CardContent>
             </Card>
-             <Link href="/signup" className="text-blue-600 hover:underline">
-                        Create an account
-                    </Link>
+             
           </div>
         ) : (
           <div className="mt-6 flex flex-col items-center gap-4">
@@ -164,4 +163,5 @@ export default function Home() {
     </div>
   );
 }
+
 
