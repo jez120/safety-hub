@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { categories } from '@/app/admin/page';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import {app} from '@/lib/firebase';
+import Link from 'next/link';
 
 export default function NewSuggestionPage() {
     const router = useRouter();
