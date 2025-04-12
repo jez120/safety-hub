@@ -14,10 +14,10 @@ import {
   onAuthStateChanged,
   updateProfile,
   User,
-  getAuth // Import getAuth
+  getAuth,
 } from 'firebase/auth';
 import {initializeApp, getApp, FirebaseApp} from 'firebase/app';
-
+import {getFirestore, doc, getDoc} from 'firebase/firestore';
 
 // Create a context for authentication
 const AuthContext = createContext<{
@@ -41,7 +41,7 @@ const AuthContext = createContext<{
 let firebaseApp: FirebaseApp;
 
 function createFirebaseApp() {
-    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+  const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
 
     const firebaseConfig = {
         apiKey: apiKey,
@@ -81,10 +81,37 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
           return;
     }
 
-    const auth = getAuth(app);
-    const unsubscribe = onAuthStateChanged(auth, user => {
-      setUser(user);
-      setLoading(false);
+      const auth = getAuth(app);
+      const unsubscribe = onAuthStateChanged(auth, async user => {
+          if (user) {
+              try {
+                  const db = getFirestore(app); // Assuming you have this initialized
+                  const userDoc = doc(db, "users", user.uid);
+                  const docSnap = await getDoc(userDoc);
+
+                  if (docSnap.exists()) {
+                      const userData = docSnap.data();
+                      const role = userData.role || 'user'; // Default to 'user' if no role
+                      setUser({
+                          ...user,
+                          role: role,
+                      } as User & { role: string }); // Extend the User type
+                  } else {
+                      // If no doc exists, assume a default role or handle as needed
+                      setUser({
+                          ...user,
+                          role: 'user',
+                      } as User & { role: string });
+                  }
+              } catch (error) {
+                  console.error("Failed to fetch user role:", error);
++                 setUser(user as User & { role: string }); // Still set user, but without role
+              } finally {
+                  setLoading(false);
+              }
+          } else {
+              setUser(null);
+          }
     });
 
     // Cleanup subscription on unmount
@@ -113,7 +140,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
   // Sign-in function
   const signIn = async (email: string, password: string) => {
     try {
-       const auth = getAuth(app);
+        const auth = getAuth(app);
       await signInWithEmailAndPassword(auth, email, password);
     } catch (error: any) {
       console.error('Signin failed:', error);
@@ -142,4 +169,3 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
 
 // Custom hook to use the authentication context
 export const useAuth = () => useContext(AuthContext);
-
