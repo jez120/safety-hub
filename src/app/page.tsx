@@ -25,7 +25,7 @@ function LoginPage() {
   const { toast } = useToast()
 
     // Initialize Firebase auth
-    const auth = getAuth(app);
+    const authInstance = getAuth(app);
 
   // Function to handle form submission
   const handleLogin = async (event) => {
@@ -35,7 +35,7 @@ function LoginPage() {
 
     try {
       // Attempt Firebase login
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(authInstance, email, password);
       console.log('Login Successful', userCredential.user.uid);
 
       // --- SUCCESS ---
