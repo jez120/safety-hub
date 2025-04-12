@@ -72,7 +72,7 @@ export default function UserDashboard() {
   return (
     <div className="container mx-auto py-10">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">User Dashboard</h1>
+        <h1 className="text-3xl font-bold text-center">User Dashboard</h1>
         <Link href="/" className="text-blue-600 hover:underline">
           Home
         </Link>
@@ -116,3 +116,4 @@ export default function UserDashboard() {
     </div>
   );
 }
+
