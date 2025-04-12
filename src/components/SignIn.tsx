@@ -10,11 +10,13 @@ import Link from 'next/link';
 export const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const {signIn} = useAuth();
+  const {signIn, loading} = useAuth();
+    const [errorMessage, setErrorMessage] = useState('');
   const {toast} = useToast();
 
   const handleSubmit = async e => {
     e.preventDefault();
+        setErrorMessage('');
     try {
       await signIn(email, password);
       toast({
@@ -23,7 +25,8 @@ export const SignIn = () => {
       });
     } catch (error: any) {
       console.error('Sign-in failed:', error);
-      if (error.message === 'Firebase: Error (auth/invalid-credential).') {
+            let friendlyMessage = 'An unexpected error occurred. Please try again.'; // Default message
+            if (error.message === 'Firebase: Error (auth/invalid-credential).') {
         toast({
           variant: 'destructive',
           title: 'Sign in failed',
@@ -64,6 +67,7 @@ export const SignIn = () => {
           onChange={e => setPassword(e.target.value)}
         />
       </div>
+             {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
       <Button type="submit">Sign In</Button>
        <Link href="/signup" className="text-blue-600 hover:underline">
         Create an account

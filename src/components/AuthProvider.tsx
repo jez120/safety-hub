@@ -77,7 +77,10 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
   const app = createFirebaseApp();
 
   useEffect(() => {
-    
+    if (!app) {
+          setLoading(false);
+          return;
+    }
       const auth = getAuth(app);
       const unsubscribe = onAuthStateChanged(auth, async user => {
           if (user) {
@@ -170,5 +173,3 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
 
 // Custom hook to use the authentication context
 export const useAuth = () => useContext(AuthContext);
-
-
