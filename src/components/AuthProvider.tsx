@@ -62,7 +62,7 @@ function createFirebaseApp() {
     try {
         firebaseApp = getApp();
     } catch (e) {
-       firebaseApp = initializeApp(firebaseConfig);
+        firebaseApp = initializeApp(firebaseConfig);
     }
     return firebaseApp;
 }
@@ -72,8 +72,15 @@ function createFirebaseApp() {
 export const AuthProvider = ({children}: {children: ReactNode}) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const app = createFirebaseApp();
 
   useEffect(() => {
+    if (!app) {
+          console.error("Firebase app initialization failed.");
+          setLoading(false);
+          return;
+    }
+
     const auth = getAuth(app);
     const unsubscribe = onAuthStateChanged(auth, user => {
       setUser(user);
@@ -82,7 +89,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
 
     // Cleanup subscription on unmount
     return () => unsubscribe();
-  }, []);
+  }, [app]);
 
   // Sign-up function
   const signUp = async (email: string, password: string, displayName: string) => {
