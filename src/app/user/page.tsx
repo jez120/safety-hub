@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCaption, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import Link from 'next/link';
@@ -65,7 +65,7 @@ export default function UserDashboard() {
     }, [user, loading, toast]);
 
     if (loading) {
-        return <div>Loading...</div>;
+        return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
     }
 
     if (!user) {
@@ -75,15 +75,16 @@ export default function UserDashboard() {
 
     return (
         <div className="container mx-auto py-10">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col items-center mb-6">
                 <h1 className="text-3xl font-bold text-center">User Dashboard</h1>
+                {user.displayName && <p className="text-lg">Welcome, {user.displayName}!</p>}
                 <Link href="/" className="text-blue-600 hover:underline">
                     Home
                 </Link>
             </div>
 
             <div className="mb-8">
-                <h2 className="text-2xl font-semibold mb-4">Your Suggestions</h2>
+                <h2 className="text-2xl font-semibold text-center mb-4">Your Suggestions</h2>
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -114,9 +115,11 @@ export default function UserDashboard() {
                 </Table>
             </div>
 
-            <Button asChild>
-                <Link href="/new-suggestion">Submit New Suggestion</Link>
-            </Button>
+            <div className="flex justify-center">
+              <Button asChild>
+                  <Link href="/new-suggestion">Submit New Suggestion</Link>
+              </Button>
+            </div>
         </div>
     );
 }
