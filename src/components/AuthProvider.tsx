@@ -34,13 +34,12 @@ function createFirebaseApp() {
   };
   try {
     firebaseApp = getApp();
-  } catch {
-    if (firebaseConfig.apiKey) {
-        firebaseApp = initializeApp(firebaseConfig);
-    } else {
+  } catch (e) {
+    if (!firebaseConfig.apiKey) {
       console.error("Firebase API key is missing. Make sure to set NEXT_PUBLIC_FIREBASE_API_KEY in your environment variables.");
       return null;
     }
+    firebaseApp = initializeApp(firebaseConfig);
   }
   return firebaseApp;
 }
@@ -68,12 +67,12 @@ const AuthContext = createContext<{
 export const AuthProvider = ({children}: {children: ReactNode}) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const app = createFirebaseApp();
 
   useEffect(() => {
-    const app = createFirebaseApp();
     if (!app) {
-        setLoading(false);
-        return;
+      setLoading(false);
+      return;
     }
     const auth = getAuth(app);
     const unsubscribe = onAuthStateChanged(auth, user => {
@@ -83,12 +82,11 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
 
     // Cleanup subscription on unmount
     return () => unsubscribe();
-  }, []);
+  }, [app]);
 
   // Sign-up function
   const signUp = async (email: string, password: string, displayName: string) => {
     try {
-      const app = createFirebaseApp();
       if (!app) {
         throw new Error("Firebase app not initialized.");
       }
@@ -111,7 +109,6 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
   // Sign-in function
   const signIn = async (email: string, password: string) => {
     try {
-      const app = createFirebaseApp();
        if (!app) {
         throw new Error("Firebase app not initialized.");
       }
@@ -126,7 +123,6 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
   // Sign-out function
   const signOutUser = async () => {
     try{
-    const app = createFirebaseApp();
      if (!app) {
         throw new Error("Firebase app not initialized.");
       }
