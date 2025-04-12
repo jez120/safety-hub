@@ -22,13 +22,21 @@ export const SignIn = () => {
         description: 'You have successfully signed in.',
       });
     } catch (error: any) {
-      if (error.message === 'Invalid email or password. Please check your credentials.') {
+      console.error('Sign-in failed:', error);
+      if (error.message === 'Firebase: Error (auth/invalid-credential).') {
         toast({
           variant: 'destructive',
           title: 'Sign in failed',
-          description: 'Invalid email or password. Please check your credentials.',
+          description: 'Invalid username or password. Please check your credentials.',
         });
-      } else {
+      } else if (error.message === 'Firebase: Error (auth/user-not-found).') {
+          toast({
+              variant: 'destructive',
+              title: 'Sign in failed',
+              description: 'There is no user record corresponding to this identifier. The user may have been deleted.',
+          });
+      }
+      else {
         toast({
           variant: 'destructive',
           title: 'Sign in failed',
@@ -57,9 +65,7 @@ export const SignIn = () => {
         />
       </div>
       <Button type="submit">Sign In</Button>
-       <Link href="/signup" className="text-blue-600 hover:underline">
-                        Create an account
-       </Link>
     </form>
   );
 };
+
