@@ -61,7 +61,7 @@ export default function NewSuggestionPage() {
                 description: 'Your suggestion has been submitted successfully.',
             });
 
-            router.push('/user');
+            router.push('/user', { forceRefresh: true });
         } catch (error) {
             console.error('Error submitting suggestion:', error);
             toast({
@@ -148,3 +148,4 @@ export default function NewSuggestionPage() {
         </div>
     );
 }
+
