@@ -14,9 +14,9 @@ import {
   onAuthStateChanged,
   updateProfile,
   User,
+  getAuth // Import getAuth
 } from 'firebase/auth';
 import {initializeApp, getApp, FirebaseApp} from 'firebase/app';
-import {app, auth} from '@/lib/firebase'; // Import Firebase app and auth
 
 
 // Create a context for authentication
@@ -62,10 +62,6 @@ function createFirebaseApp() {
     try {
         firebaseApp = getApp();
     } catch (e) {
-        if (!apiKey) {
-            console.error('Firebase API key is missing. Make sure to set NEXT_PUBLIC_FIREBASE_API_KEY in your environment variables.');
-            return null;
-        }
        firebaseApp = initializeApp(firebaseConfig);
     }
     return firebaseApp;
