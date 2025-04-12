@@ -9,6 +9,7 @@ import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import {useToast} from "@/hooks/use-toast";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 
 async function getUserRole(userId: string): Promise<{ isAdmin: boolean }> {
   // Replace this with your actual implementation to fetch the user's role from your database
@@ -28,7 +29,6 @@ function LoginPage() {
 
   // Function to handle form submission
   const handleLogin = async (event) => {
-    const router = useRouter();
     event.preventDefault(); // Prevent page reload
     setLoading(true);
     setErrorMessage(''); // Clear any previous error messages
@@ -42,12 +42,24 @@ function LoginPage() {
       // Redirect to the home page or dashboard after successful login
       // You might want to check the user's role here first before redirecting
       // For now, just redirecting to home page:
-      const role = await getUserRole(userCredential.user.uid);
-      if (role.isAdmin) {
-        router.push('/admin');
-      } else {
-        router.push('/user');
-      }
+      const db = getFirestore(app);
+        const userDocRef = doc(db, "users", userCredential.user.uid);
+        const docSnap = await getDoc(userDocRef);
+
+        if (docSnap.exists()) {
+            const userData = docSnap.data();
+            const role = userData.role || 'user'; // Default to 'user' if no role
+
+            if (role === 'admin') {
+                router.push('/admin');
+            } else {
+                router.push('/user');
+            }
+        } else {
+            // Handle the case where the user document doesn't exist
+            console.warn("User document not found in Firestore, assigning 'user' role.");
+            router.push('/user'); // Or handle differently
+        }
 
 
     } catch (error) {
@@ -136,6 +148,18 @@ function LoginPage() {
               </CardContent>
             </Card>
           </main>
+           <footer className="flex justify-center items-center w-full h-12 border-t">
+          <a
+            href="https://arekpeter.com"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Powered by{' '}
+            <span className="font-semibold">
+              Arek Peter Inc.
+            </span>
+          </a>
+        </footer>
      </div>
   );
 }
