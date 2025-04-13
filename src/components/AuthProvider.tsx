@@ -139,13 +139,8 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
       setUser(userCredential.user as User & { role: string });
     }    catch (error: any) {
             console.error('Signup failed:', error);
-             if (error.code === 'auth/email-already-in-use') {
-                  toast({
-                      variant: 'destructive',
-                      title: 'Sign up failed',
-                      description: 'That email is already in use. Please use a different email or sign in.',
-                  });
-              }
+             // We removed the toast here for 'auth/email-already-in-use'
+             // It will be handled by the component now.
             throw error; // Re-throw to handle it in the component
         }
   };
@@ -158,6 +153,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
     }    catch (error: any) {
             console.error('Signin failed:', error);
              if (error.message === 'Firebase: Error (auth/invalid-credential).') {
+                  // This error is handled in SignIn.tsx
                   throw new Error('Invalid email or password. Please check your credentials.');
               }
             throw error; // Re-throw to handle it in the component
@@ -185,4 +181,3 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
 
 // Custom hook to use the authentication context
 export const useAuth = () => useContext(AuthContext);
-

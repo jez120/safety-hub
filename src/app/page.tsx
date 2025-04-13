@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useState } from 'react';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'; // Import getAuth
@@ -76,27 +76,15 @@ function LoginPage() {
         case 'auth/wrong-password':
         case 'auth/invalid-credential':
           friendlyMessage = 'Incorrect email or password entered.';
-            toast({
-                variant: 'destructive',
-                title: 'Authentication failed',
-                description: 'Invalid credentials'
-            })
+            
           break;
         case 'auth/too-many-requests':
           friendlyMessage = 'Access temporarily disabled due to too many failed login attempts. You can reset your password or try again later.';
-           toast({
-                variant: 'destructive',
-                title: 'Authentication failed',
-                description: 'Too many attempts'
-            })
+           
           break;
         case 'auth/user-disabled':
           friendlyMessage = 'This user account has been disabled.';
-           toast({
-                variant: 'destructive',
-                title: 'Authentication failed',
-                description: 'Account disabled'
-            })
+           
           break;
         // Add other specific Firebase Auth error codes if needed
       }

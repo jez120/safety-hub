@@ -27,24 +27,12 @@ export const SignIn = () => {
       console.error('Sign-in failed:', error);
             let friendlyMessage = 'An unexpected error occurred. Please try again.'; // Default message
             if (error.message === 'Firebase: Error (auth/invalid-credential).') {
-        toast({
-          variant: 'destructive',
-          title: 'Sign in failed',
-          description: 'Invalid username or password. Please check your credentials.',
-        });
+       
       } else if (error.message === 'Firebase: Error (auth/user-not-found).') {
-          toast({
-              variant: 'destructive',
-              title: 'Sign in failed',
-              description: 'There is no user record corresponding to this identifier. The user may have been deleted.',
-          });
+         
       }
       else {
-        toast({
-          variant: 'destructive',
-          title: 'Sign in failed',
-          description: 'An unexpected error occurred. Please try again.',
-        });
+        
       }
     }
   };
@@ -75,4 +63,3 @@ export const SignIn = () => {
     </form>
   );
 };
-
