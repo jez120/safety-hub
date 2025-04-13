@@ -31,7 +31,6 @@ import {
   getFirestore,
   doc,
   updateDoc,
-  deleteDoc,
 } from "firebase/firestore";
 import {app} from '@/lib/firebase';
 import {useToast} from '@/hooks/use-toast';
@@ -121,7 +120,7 @@ export default function AdminPage() {
                   title: "Unauthorized",
                   description: "You do not have permission to access this page.", variant: "destructive"
               });
-              router.push('/user');
+              router.push('/');
           } else {
               loadSuggestions();
           }
@@ -431,3 +430,4 @@ function SuggestionDialog({open, onClose, suggestion, onSave}) {
     </Dialog>
   );
 }
+
