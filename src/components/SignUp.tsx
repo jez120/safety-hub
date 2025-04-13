@@ -32,7 +32,7 @@ export const SignUp = () => {
       console.error("Signup component caught error:", error);
       // Set inline error message based on the error code
       if (error?.code === 'auth/email-already-in-use') {
-        // setErrorMessage('This email address is already registered. Please try logging in or use a different email.');
+        setErrorMessage('This email address is already registered. Please try logging in or use a different email.');
       } else if (error?.code === 'auth/weak-password'){
           setErrorMessage('Password is too weak. It should be at least 6 characters long.');
       } else if (error?.code === 'auth/invalid-email') {
