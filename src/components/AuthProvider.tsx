@@ -19,6 +19,7 @@ import {
 } from 'firebase/auth';
 import {initializeApp, getApp, FirebaseApp} from 'firebase/app';
 import {getFirestore, doc, getDoc, setDoc} from 'firebase/firestore';
+import {useToast} from '@/hooks/use-toast';
 
 // Create a context for authentication
 const AuthContext = createContext<{
@@ -62,7 +63,7 @@ function createFirebaseApp() {
   try {
     firebaseApp = getApp();
   } catch (e) {
-      firebaseApp = initializeApp(firebaseConfig);
+    firebaseApp = initializeApp(firebaseConfig);
   }
   return firebaseApp;
 }
@@ -71,6 +72,7 @@ function createFirebaseApp() {
 export const AuthProvider = ({children}: {children: ReactNode}) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+    const {toast} = useToast();
   const app = createFirebaseApp();
 
   useEffect(() => {
@@ -136,10 +138,17 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
                 role: 'user', // default role
             });
       setUser(userCredential.user as User & { role: string });
-    } catch (error: any) {
-      console.error('Signup failed:', error);
-      throw error; // Re-throw to handle it in the component
-    }
+    }    catch (error: any) {
+            console.error('Signup failed:', error);
+             if (error.code === 'auth/email-already-in-use') {
+                  toast({
+                      variant: 'destructive',
+                      title: 'Sign up failed',
+                      description: 'That email is already in use. Please use a different email or sign in.',
+                  });
+              }
+            throw error; // Re-throw to handle it in the component
+        }
   };
 
   // Sign-in function
