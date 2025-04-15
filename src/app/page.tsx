@@ -64,7 +64,7 @@ function LoginPage() {
 
     } catch (error) {
       // --- FAILURE ---
-      console.error('Login Error Code:', error.code, error.message); // Log the specific error code
+      console.error('Login Error Code:', error.message); // Log the specific error code
       let friendlyMessage = 'An unexpected error occurred. Please try again.'; // Default
 
       // Set a user-friendly message based on the error code
