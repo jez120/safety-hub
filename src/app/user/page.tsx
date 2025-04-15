@@ -117,13 +117,16 @@ export default function UserDashboard() {
             <div className="flex justify-between items-center mb-6">
                 <Button onClick={handleSignOut} variant="outline">Log Off</Button> {/* Changed variant */}
                  {/* Removed the empty div for title */}
-                 <h1 className="text-2xl font-bold text-center flex-grow">Your Dashboard</h1> {/* Added title back */}
             </div>
              <div className="flex flex-col items-center mb-6">
                  {user.displayName && <p className="text-lg">Welcome, {user.displayName}!</p>}
+                 <h1 className="text-2xl font-bold text-center flex-grow">Your Dashboard</h1> {/* Added title back */}
+                  <Button asChild>
+                    <Link href="/">Home</Link>
+                  </Button>
             </div>
 
-            <Card className="mb-8"> {/* Wrap table in a card */} 
+            <Card className="mb-8"> {/* Wrap table in a card */}
                 <CardHeader>
                      <CardTitle>Your Suggestions</CardTitle>
                      <CardDescription>Suggestions you have submitted.</CardDescription>
@@ -183,3 +186,4 @@ export default function UserDashboard() {
         </div>
     );
 }
+
