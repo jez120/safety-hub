@@ -1,3 +1,4 @@
+
 'use client';
 
 import {useState, useEffect} from 'react';
@@ -310,7 +311,7 @@ export default function AdminPage() {
                       <TableHead className="hidden md:table-cell">Date</TableHead>
                       <TableHead className="hidden lg:table-cell">Assigned To</TableHead>
                       <TableHead>Attachment</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -331,7 +332,7 @@ export default function AdminPage() {
                                 '-'
                             )}
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell>
                           <Button size="sm" variant="outline" onClick={() => handleOpenDialog(suggestion)}>Manage</Button>
                         </TableCell>
                       </TableRow>
@@ -442,7 +443,7 @@ function SuggestionDialog({open, onClose, suggestion, onSave, toast, db}: Sugges
               </SelectTrigger>
               <SelectContent>
                 {categories.map(cat => (
-                  <SelectItem key={cat} value={cat || ''}>{cat}</SelectItem>
+                  <SelectItem key={cat} value={cat ?? ""}>{cat}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -501,4 +502,3 @@ function SuggestionDialog({open, onClose, suggestion, onSave, toast, db}: Sugges
     </Dialog>
   );
 }
-
