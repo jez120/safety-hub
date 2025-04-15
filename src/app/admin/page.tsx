@@ -1,5 +1,3 @@
-'use client';
-
 import {useState, useEffect} from 'react';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import {Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table';
@@ -469,7 +467,7 @@ function SuggestionDialog({open, onClose, suggestion, onSave, toast, db}: Sugges
                 <SelectValue placeholder="Assign a user" />
               </SelectTrigger>
               <SelectContent>
-                 <SelectItem value="">* Unassigned *</SelectItem>
+                 <SelectItem key="unassigned" value="">* Unassigned *</SelectItem>
                 {users.map(user => (
                   <SelectItem key={user} value={user}>{user}</SelectItem>
                 ))}
