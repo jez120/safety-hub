@@ -113,20 +113,19 @@ export default function UserDashboard() {
     };
 
     return (
-        <div className="container mx-auto py-10 px-4"> {/* Added padding */}
+        <div className="container mx-auto py-10 px-4">
             <div className="flex justify-between items-center mb-6">
-                <Button onClick={handleSignOut} variant="outline">Log Off</Button> {/* Changed variant */}
-                 {/* Removed the empty div for title */}
+                <Button onClick={handleSignOut} variant="outline" className="absolute top-4 right-4">Log Off</Button>
             </div>
              <div className="flex flex-col items-center mb-6">
-                 {user.displayName && <p className="text-lg">Welcome, {user.displayName}!</p>}
-                 <h1 className="text-2xl font-bold text-center flex-grow">Your Dashboard</h1> {/* Added title back */}
-                  <Button asChild>
+                  <Button asChild variant="link" className="mb-4">
                     <Link href="/">Home</Link>
                   </Button>
+                 {user.displayName && <p className="text-lg">Welcome, {user.displayName}!</p>}
+                 <h1 className="text-2xl font-bold text-center flex-grow">Your Dashboard</h1>
             </div>
 
-            <Card className="mb-8"> {/* Wrap table in a card */}
+            <Card className="mb-8">
                 <CardHeader>
                      <CardTitle>Your Suggestions</CardTitle>
                      <CardDescription>Suggestions you have submitted.</CardDescription>
@@ -140,18 +139,18 @@ export default function UserDashboard() {
                                 <TableHead>Status</TableHead>
                                 <TableHead>Date</TableHead>
                                 <TableHead>Assigned To</TableHead>
-                                <TableHead>Attachment</TableHead> {/* Added Attachment column */}
+                                <TableHead>Attachment</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {suggestions && suggestions.length > 0 ? (
                                 suggestions.map(suggestion => (
                                     <TableRow key={suggestion.id}>
-                                        <TableCell className="font-medium">{suggestion.title}</TableCell> {/* Added font-medium */}
+                                        <TableCell className="font-medium">{suggestion.title}</TableCell>
                                         <TableCell>{suggestion.category}</TableCell>
                                         <TableCell>{suggestion.status}</TableCell>
-                                        <TableCell>{suggestion.date ? format(suggestion.date as Date, 'MM/dd/yyyy') : 'N/A'}</TableCell> {/* Handle potential null date */}
-                                        <TableCell>{suggestion.assignedTo || '-'}</TableCell> {/* Handle empty assignedTo */}
+                                        <TableCell>{suggestion.date ? format(suggestion.date as Date, 'MM/dd/yyyy') : 'N/A'}</TableCell>
+                                        <TableCell>{suggestion.assignedTo || '-'}</TableCell>
                                         <TableCell>
                                             {suggestion.attachmentUrl ? (
                                                 <a
@@ -170,7 +169,7 @@ export default function UserDashboard() {
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="text-center">No suggestions submitted yet.</TableCell> {/* Updated colSpan */}
+                                    <TableCell colSpan={6} className="text-center">No suggestions submitted yet.</TableCell>
                                 </TableRow>
                             )}
                         </TableBody>
