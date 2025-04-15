@@ -1,4 +1,3 @@
-
 'use client';
 
 import {useState, useEffect} from 'react';
@@ -502,3 +501,4 @@ function SuggestionDialog({open, onClose, suggestion, onSave, toast, db}: Sugges
     </Dialog>
   );
 }
+
