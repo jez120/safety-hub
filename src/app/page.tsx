@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'; // Import getAuth
+import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth'; // Import getAuth and sendPasswordResetEmail
 import { app } from '../lib/firebase'; // <-- ADJUST PATH if needed
 import { useRouter } from 'next/navigation';
 import Link from 'next/link'; // Optional: for signup link
@@ -39,9 +39,6 @@ function LoginPage() {
       console.log('Login Successful', userCredential.user.uid);
 
       // --- SUCCESS ---
-      // Redirect to the home page or dashboard after successful login
-      // You might want to check the user's role here first before redirecting
-      // For now, just redirecting to home page:
       const db = getFirestore(app);
         const userDocRef = doc(db, "users", userCredential.user.uid);
         const docSnap = await getDoc(userDocRef);
@@ -76,15 +73,12 @@ function LoginPage() {
         case 'auth/wrong-password':
         case 'auth/invalid-credential':
           friendlyMessage = 'Incorrect email or password entered.';
-            
           break;
         case 'auth/too-many-requests':
           friendlyMessage = 'Access temporarily disabled due to too many failed login attempts. You can reset your password or try again later.';
-           
           break;
         case 'auth/user-disabled':
           friendlyMessage = 'This user account has been disabled.';
-           
           break;
         // Add other specific Firebase Auth error codes if needed
       }
@@ -93,6 +87,43 @@ function LoginPage() {
     } finally {
       setLoading(false); // Ensure loading state is turned off
     }
+  };
+
+  // Function to handle password reset request
+  const handlePasswordReset = async () => {
+      if (!email) {
+          toast({
+              variant: 'destructive',
+              title: 'Email required',
+              description: 'Please enter your email address to reset the password.',
+          });
+          return;
+      }
+      setLoading(true);
+      setErrorMessage('');
+      try {
+          await sendPasswordResetEmail(authInstance, email);
+          toast({
+              title: 'Password Reset Email Sent',
+              description: 'Check your email inbox for instructions to reset your password.',
+          });
+      } catch (error) {
+          console.error('Password Reset Error:', error);
+          let friendlyMessage = 'Failed to send password reset email.';
+          if (error.code === 'auth/invalid-email') {
+              friendlyMessage = 'Please enter a valid email address.';
+          } else if (error.code === 'auth/user-not-found') {
+              friendlyMessage = 'No account found with this email address.';
+          }
+           setErrorMessage(friendlyMessage);
+          toast({
+              variant: 'destructive',
+              title: 'Password Reset Failed',
+              description: friendlyMessage,
+          });
+      } finally {
+          setLoading(false);
+      }
   };
 
   return (
@@ -111,6 +142,7 @@ function LoginPage() {
                         placeholder="Email"
                         value={email}
                         onChange={e => setEmail(e.target.value)}
+                        required // Make email required for reset too
                         />
                     </div>
                     <div>
@@ -122,16 +154,27 @@ function LoginPage() {
                         />
                     </div>
                       {errorMessage && (
-          <p style={{ color: 'red' }}>
+          <p className="text-red-500 text-sm">
             {errorMessage}
           </p>
         )}
                     <Button type="submit" disabled={loading}>
                          {loading ? 'Logging In...' : 'Login'}
                     </Button>
-                     <Link href="/signup" className="text-blue-600 hover:underline">
-                        Create an account
-                    </Link>
+                    <div className="flex flex-col items-center gap-2 mt-2"> {/* Added container for links */}
+                        <Link href="/signup" className="text-sm text-blue-600 hover:underline">
+                            Create an account
+                        </Link>
+                        <Button
+                            type="button"
+                            variant="link"
+                            onClick={handlePasswordReset}
+                            disabled={loading}
+                            className="text-sm text-blue-600 hover:underline p-0 h-auto" // Adjusted styling
+                        >
+                            Forgot Password?
+                        </Button>
+                    </div>
                  </form>
               </CardContent>
             </Card>

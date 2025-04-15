@@ -8,7 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableHead, TableHeader, TableRow, TableCell, TableCaption } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
-import Link from 'next/link';
+import { signOut } from 'firebase/auth'
+import { Timestamp } from 'firebase/firestore'; // Import Timestamp
+import { auth, app } from '@/lib/firebase'
 import {
     collection,
     query,
@@ -17,10 +19,24 @@ import {
     getFirestore,
     where,
 } from "firebase/firestore";
-import { app } from '@/lib/firebase';
+// Removed Router import as it's not used directly
+import Link from 'next/link';
+import { ExternalLink } from 'lucide-react'; // Import an icon for the link
+
+interface Suggestion {
+    id: string;
+    title: string;
+    category: string;
+    status: string;
+    date: Date | Timestamp; // Allow both Date and Timestamp
+    assignedTo?: string;
+    attachmentName?: string;
+    attachmentUrl?: string;
+    // Add other fields as necessary
+}
 
 export default function UserDashboard() {
-    const [suggestions, setSuggestions] = useState([]);
+    const [suggestions, setSuggestions] = useState<Suggestion[]>([]); // Use Suggestion interface
     const { user, loading } = useAuth();
     const { toast } = useToast();
     const router = useRouter();
@@ -31,7 +47,6 @@ export default function UserDashboard() {
 
             const db = getFirestore(app);
             const suggestionsCollection = collection(db, 'suggestions');
-            // Create a query against the collection.
             const q = query(
                 suggestionsCollection,
                 orderBy('date', 'desc'),
@@ -40,14 +55,18 @@ export default function UserDashboard() {
 
             try {
                 const querySnapshot = await getDocs(q);
-                const fetchedSuggestions = querySnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data(),
-                    date: doc.data().date ? new Date(doc.data().date.seconds * 1000) : new Date(),
-                })).filter(suggestion => suggestion.date instanceof Date); // Ensure date is a Date object
+                const fetchedSuggestions = querySnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    // Convert Firestore Timestamp to JS Date if necessary
+                    const date = data.date instanceof Timestamp ? data.date.toDate() : (data.date ? new Date(data.date) : new Date());
+                    return {
+                        id: doc.id,
+                        ...data,
+                        date: date,
+                    } as Suggestion; // Cast to Suggestion
+                });
 
-                console.log('Fetched Suggestions:', fetchedSuggestions); // Debugging: Log fetched suggestions
-
+                console.log('Fetched Suggestions:', fetchedSuggestions);
                 setSuggestions(fetchedSuggestions);
             } catch (error) {
                 console.error('Error fetching suggestions:', error);
@@ -65,7 +84,7 @@ export default function UserDashboard() {
     }, [user, loading, router, toast]);
 
     useEffect(() => {
-        console.log('Suggestions state updated:', suggestions); // Debugging: Log suggestions state
+        console.log('Suggestions state updated:', suggestions);
     }, [suggestions]);
 
     if (loading) {
@@ -73,53 +92,88 @@ export default function UserDashboard() {
     }
 
     if (!user) {
-        router.push('/'); // Redirect to login if not authenticated
-        return null;
+        // This part might cause issues during initial load if user is briefly null
+        // Consider showing a loading state or handling redirect more gracefully
+        // router.push('/');
+        return <div className="flex justify-center items-center min-h-screen">Redirecting...</div>; // Or a better loading/redirect indicator
     }
 
+    const handleSignOut = async () => {
+        try {
+            await signOut(auth);
+            router.push('/');
+        } catch (error) {
+            console.error('Sign out failed', error);
+             toast({ // Add toast for sign out error
+                 variant: 'destructive',
+                 title: 'Sign Out Failed',
+                 description: 'Could not sign out. Please try again.',
+             });
+        }
+    };
+
     return (
-        <div className="container mx-auto py-10">
+        <div className="container mx-auto py-10 px-4"> {/* Added padding */}
             <div className="flex justify-between items-center mb-6">
-               <Link href="/" className="text-blue-600 hover:underline">
-                    Home
-                </Link>
-                 <h1 className="text-3xl font-bold text-center flex-grow">User Dashboard</h1>
+                <Button onClick={handleSignOut} variant="outline">Log Off</Button> {/* Changed variant */}
+                 {/* Removed the empty div for title */}
+                 <h1 className="text-2xl font-bold text-center flex-grow">Your Dashboard</h1> {/* Added title back */}
             </div>
              <div className="flex flex-col items-center mb-6">
                  {user.displayName && <p className="text-lg">Welcome, {user.displayName}!</p>}
             </div>
 
-            <div className="mb-8">
-                <h2 className="text-2xl font-semibold text-center mb-4">Your Suggestions</h2>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Title</TableHead>
-                            <TableHead>Category</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Date</TableHead>
-                            <TableHead>Assigned To</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {suggestions && suggestions.length > 0 ? (
-                            suggestions.map(suggestion => (
-                                <TableRow key={suggestion.id}>
-                                    <TableCell>{suggestion.title}</TableCell>
-                                    <TableCell>{suggestion.category}</TableCell>
-                                    <TableCell>{suggestion.status}</TableCell>
-                                    <TableCell>{format(suggestion.date, 'MM/dd/yyyy')}</TableCell>
-                                    <TableCell>{suggestion.assignedTo}</TableCell>
-                                </TableRow>
-                            ))
-                        ) : (
+            <Card className="mb-8"> {/* Wrap table in a card */} 
+                <CardHeader>
+                     <CardTitle>Your Suggestions</CardTitle>
+                     <CardDescription>Suggestions you have submitted.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
                             <TableRow>
-                                <TableCell colSpan={5} className="text-center">No suggestions submitted yet.</TableCell>
+                                <TableHead>Title</TableHead>
+                                <TableHead>Category</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead>Date</TableHead>
+                                <TableHead>Assigned To</TableHead>
+                                <TableHead>Attachment</TableHead> {/* Added Attachment column */}
                             </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
+                        </TableHeader>
+                        <TableBody>
+                            {suggestions && suggestions.length > 0 ? (
+                                suggestions.map(suggestion => (
+                                    <TableRow key={suggestion.id}>
+                                        <TableCell className="font-medium">{suggestion.title}</TableCell> {/* Added font-medium */}
+                                        <TableCell>{suggestion.category}</TableCell>
+                                        <TableCell>{suggestion.status}</TableCell>
+                                        <TableCell>{suggestion.date ? format(suggestion.date as Date, 'MM/dd/yyyy') : 'N/A'}</TableCell> {/* Handle potential null date */}
+                                        <TableCell>{suggestion.assignedTo || '-'}</TableCell> {/* Handle empty assignedTo */}
+                                        <TableCell>
+                                            {suggestion.attachmentUrl ? (
+                                                <a
+                                                    href={suggestion.attachmentUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center text-blue-600 hover:underline"
+                                                >
+                                                    {suggestion.attachmentName || 'View Attachment'} <ExternalLink className="ml-1 h-4 w-4" />
+                                                </a>
+                                            ) : (
+                                                '-'
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="text-center">No suggestions submitted yet.</TableCell> {/* Updated colSpan */}
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
 
             <div className="flex justify-center">
               <Button asChild>
@@ -129,5 +183,3 @@ export default function UserDashboard() {
         </div>
     );
 }
-
-

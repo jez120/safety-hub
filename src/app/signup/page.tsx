@@ -6,8 +6,9 @@ import {Input} from '@/components/ui/input';
 import {useAuth} from '@/components/AuthProvider';
 import {useToast} from '@/hooks/use-toast';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase'; // Import auth
 
 export default function SignUpPage() {
   const [name, setName] = useState('');
@@ -32,6 +33,20 @@ export default function SignUpPage() {
         title: 'Sign up failed',
         description: 'Failed to create account. Please try again.',
       });
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+        await signOut(auth);
+        router.push('/');
+    } catch (error) {
+        console.error('Sign out failed', error);
+        toast({
+            variant: 'destructive',
+            title: 'Sign out failed',
+            description: 'Could not log out. Please try again.',
+        });
     }
   };
 
@@ -70,9 +85,9 @@ export default function SignUpPage() {
                         />
                     </div>
                     <Button type="submit">Sign Up</Button>
-                    <Link href="/" className="text-blue-600 hover:underline">
-                        Home
-                    </Link>
+                    <Button type="button" variant="link" onClick={handleSignOut} className="text-blue-600 hover:underline">
+                        Log Off
+                    </Button>
                  </form>
               </CardContent>
             </Card>
