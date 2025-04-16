@@ -11,8 +11,8 @@ import {Label} from '@/components/ui/label';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {cn} from '@/lib/utils';
 import {format} from 'date-fns';
-import { Timestamp, getDoc } from 'firebase/firestore'; // Import Timestamp & getDoc
-import { ExternalLink, Paperclip } from 'lucide-react'; // Removed unused CalendarIcon, Added Paperclip
+import { Timestamp, getDoc, Firestore } from 'firebase/firestore'; // Import Timestamp, getDoc, and Firestore type
+import { ExternalLink, Paperclip } from 'lucide-react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -48,19 +48,18 @@ ChartJS.register(
   Legend
 );
 
-// Define Suggestion interface (can be moved to a types file)
+// Define Suggestion interface
 interface Suggestion {
     id: string;
     title: string;
     category: string;
     status: string;
     description: string;
-    date: Date | Timestamp; // Allow both Date and Timestamp
+    date: Date | Timestamp;
     assignedTo?: string;
     attachmentName?: string;
     attachmentUrl?: string;
     userId: string;
-    // Add other fields as necessary
 }
 
 const categories = [
@@ -75,7 +74,6 @@ const categories = [
   "Other"
 ];
 
-// Ideally, fetch this list from Firestore or your user management system
 const users = [
   "John Doe",
   "Jane Smith",
@@ -165,9 +163,8 @@ export default function AdminPage() {
 
     if (!user) {
          router.push('/');
-         return null;
+         return null; // Return null instead of relying on push redirecting immediately
     }
-
 
   const handleOpenDialog = (suggestion: Suggestion) => {
     setSelectedSuggestion(suggestion);
@@ -207,7 +204,7 @@ export default function AdminPage() {
       acc[status] = (acc[status] || 0) + 1;
       return acc;
     },
-    {}
+    {} as Record<string, number>
   );
 
   const chartData = {
@@ -217,10 +214,10 @@ export default function AdminPage() {
         label: 'Number of Suggestions',
         data: Object.values(suggestionCounts),
         backgroundColor: [
-          'rgba(255, 99, 132, 0.5)',
-          'rgba(54, 162, 235, 0.5)',
-          'rgba(75, 192, 192, 0.5)',
-          'rgba(255, 206, 86, 0.5)',
+          'rgba(255, 99, 132, 0.5)', // Open
+          'rgba(54, 162, 235, 0.5)', // In Progress
+          'rgba(75, 192, 192, 0.5)', // Closed
+          'rgba(255, 206, 86, 0.5)', // Unknown/Other
         ],
         borderColor: [
             'rgba(255, 99, 132, 1)',
@@ -240,9 +237,6 @@ export default function AdminPage() {
          <Button type="button" variant="outline" onClick={handleSignOut}>
            Log Off
          </Button>
-        <Button asChild>
-          <Link href="/">Home</Link>
-        </Button>
       </div>
 
       {/* Stats Cards */}
@@ -293,7 +287,6 @@ export default function AdminPage() {
             </CardContent>
       </Card>
 
-
       {/* Suggestions Table Card */}
        <Card>
           <CardHeader>
@@ -303,7 +296,7 @@ export default function AdminPage() {
           <CardContent>
                 <Table>
                   <TableHeader>
-                    <TableRow>{/* Trimmed whitespace */}
+                    <TableRow>
                       <TableHead>Title</TableHead>
                       <TableHead className="hidden sm:table-cell">Category</TableHead>
                       <TableHead>Status</TableHead>
@@ -315,7 +308,6 @@ export default function AdminPage() {
                   </TableHeader>
                   <TableBody>
                     {suggestions.map(suggestion => (
-                      // Ensure no whitespace between elements in the fragment/row
                       <TableRow key={suggestion.id}>
                         <TableCell className="font-medium">{suggestion.title}</TableCell>
                         <TableCell className="hidden sm:table-cell">{suggestion.category}</TableCell>
@@ -353,7 +345,7 @@ export default function AdminPage() {
           suggestion={selectedSuggestion}
           onSave={handleSaveSuggestionInDialog}
           toast={toast}
-          db={getFirestore(app)}
+          db={getFirestore(app)} // Pass the Firestore instance directly
         />
       )}
     </div>
@@ -366,11 +358,11 @@ interface SuggestionDialogProps {
     onClose: () => void;
     suggestion: Suggestion;
     onSave: (updatedSuggestion: Suggestion) => void;
-    toast: any;
-    db: any;
+    toast: any; // Keep as any for now, or import specific toast type if known
+    db: Firestore; // Use the imported Firestore type
 }
 
-function SuggestionDialog({open, onClose, suggestion, onSave, toast, db}: SuggestionDialogProps) {
+function SuggestionDialog({open, onClose, suggestion, onSave, toast, db}: SuggestionDialogProps): JSX.Element { // Add return type
   const [title, setTitle] = useState(suggestion.title);
   const [category, setCategory] = useState(suggestion.category);
   const [status, setStatus] = useState(suggestion.status);
@@ -378,6 +370,7 @@ function SuggestionDialog({open, onClose, suggestion, onSave, toast, db}: Sugges
   const [assignedTo, setAssignedTo] = useState(suggestion.assignedTo || '');
   const [isSaving, setIsSaving] = useState(false);
 
+  // Reset state when suggestion prop changes
   useEffect(() => {
       setTitle(suggestion.title);
       setCategory(suggestion.category);
@@ -397,9 +390,14 @@ function SuggestionDialog({open, onClose, suggestion, onSave, toast, db}: Sugges
     };
 
     try {
+       // Use the passed db instance directly
        const suggestionDocRef = doc(db, 'suggestions', suggestion.id);
        await updateDoc(suggestionDocRef, updatedSuggestionData);
-       const updatedLocalSuggestion = { ...suggestion, ...updatedSuggestionData };
+       const updatedLocalSuggestion: Suggestion = {
+           ...suggestion,
+           ...updatedSuggestionData,
+           date: suggestion.date instanceof Timestamp ? suggestion.date.toDate() : suggestion.date,
+        };
        onSave(updatedLocalSuggestion);
        toast({
            title: 'Suggestion Saved',

@@ -118,11 +118,9 @@ export default function UserDashboard() {
                 <Button onClick={handleSignOut} variant="outline" className="absolute top-4 right-4">Log Off</Button>
             </div>
              <div className="flex flex-col items-center mb-6">
-                  <Button asChild variant="link" className="mb-4">
-                    <Link href="/">Home</Link>
-                  </Button>
+                 
                  {user.displayName && <p className="text-lg">Welcome, {user.displayName}!</p>}
-                 <h1 className="text-2xl font-bold text-center flex-grow">Your Dashboard</h1>
+                 
             </div>
 
             <Card className="mb-8">
